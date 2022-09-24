@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -25,6 +25,9 @@ md"_homework 9, version 3_"
 # ╔═╡ 49567f8e-09a2-11eb-34c1-bb5c0b642fe8
 # hello there
 
+# ╔═╡ 9025aaaf-95ec-4094-8a8c-c48d0951926e
+PlutoUI.TableOfContents()
+
 # ╔═╡ 181e156c-0970-11eb-0b77-49b143cc0fc0
 md"""
 
@@ -41,7 +44,7 @@ Feel free to ask questions!
 # ╔═╡ 1f299cc6-0970-11eb-195b-3f951f92ceeb
 # edit the code below to set your name and kerberos ID (i.e. email without @mit.edu)
 
-student = (name = "Jazzy Doe", kerberos_id = "jazz")
+student = (name = "Zeki Zhang", kerberos_id = "198964")
 
 # you might need to wait until all other cells in this notebook have completed running. 
 # scroll around the page to see what's up
@@ -49,7 +52,7 @@ student = (name = "Jazzy Doe", kerberos_id = "jazz")
 # ╔═╡ 1bba5552-0970-11eb-1b9a-87eeee0ecc36
 md"""
 
-Submission by: **_$(student.name)_** ($(student.kerberos_id)@mit.edu)
+Submission by: **_$(student.name)_**)
 """
 
 # ╔═╡ 2848996c-0970-11eb-19eb-c719d797c322
@@ -82,7 +85,10 @@ We define a struct type `Coordinate` that contains integers `x` and `y`.
 """
 
 # ╔═╡ 0ebd35c8-0972-11eb-2e67-698fd2d311d2
-
+struct Coordinate
+	x::Int64
+	y::Int64
+end
 
 # ╔═╡ 027a5f48-0a44-11eb-1fbf-a94d02d0b8e3
 md"""
@@ -90,7 +96,7 @@ md"""
 """
 
 # ╔═╡ b2f90634-0a68-11eb-1618-0b42f956b5a7
-origin = missing
+origin = Coordinate(0,0)
 
 # ╔═╡ 3e858990-0954-11eb-3d10-d10175d8ca1c
 md"""
@@ -98,9 +104,10 @@ md"""
 """
 
 # ╔═╡ 189bafac-0972-11eb-1893-094691b2073c
-# function make_tuple(c)
+function make_tuple(c::Coordinate)
 # 	missing
-# end
+	return (c.x, c.y)
+end
 
 # ╔═╡ 73ed1384-0a29-11eb-06bd-d3c441b8a5fc
 md"""
@@ -117,12 +124,6 @@ _(There are [lots of special 'infixable' function names](https://github.com/Juli
 
 When you call it with the prefix notation, it becomes clear that it really is 'just another function', with lots of predefined methods.
 """
-
-# ╔═╡ 96707ef0-0a29-11eb-1a3e-6bcdfb7897eb
-+(1, 2)
-
-# ╔═╡ b0337d24-0a29-11eb-1fab-876a87c0973f
-+
 
 # ╔═╡ 9c9f53b2-09ea-11eb-0cda-639764250cee
 md"""
@@ -142,13 +143,20 @@ md"""
 """
 
 # ╔═╡ e24d5796-0a68-11eb-23bb-d55d206f3c40
-# function Base.:+(a::TYPE, b::TYPE)
+function Base.:+(a::Coordinate, b::Coordinate)
 	
-# 	return missing
-# end
+	return Coordinate(a.x + b.x, a.y + b.y)
+	
+end
+
+# ╔═╡ 96707ef0-0a29-11eb-1a3e-6bcdfb7897eb
++(1, 2)
+
+# ╔═╡ b0337d24-0a29-11eb-1fab-876a87c0973f
++
 
 # ╔═╡ ec8e4daa-0a2c-11eb-20e1-c5957e1feba3
-# Coordinate(3,4) + Coordinate(10,10) # uncomment to check + works
+Coordinate(3,4) + Coordinate(10,10) # uncomment to check + works
 
 # ╔═╡ e144e9d0-0a2d-11eb-016e-0b79eba4b2bb
 md"""
@@ -164,12 +172,12 @@ In our model, agents will be able to walk in 4 directions: up, down, left and ri
 # ╔═╡ 5278e232-0972-11eb-19ff-a1a195127297
 # uncomment this:
 
-# possible_moves = [
-# 	Coordinate( 1, 0), 
-# 	Coordinate( 0, 1), 
-# 	Coordinate(-1, 0), 
-# 	Coordinate( 0,-1),
-# ]
+possible_moves = [
+	Coordinate( 1, 0), 
+	Coordinate( 0, 1), 
+	Coordinate(-1, 0), 
+	Coordinate( 0,-1),
+]
 
 # ╔═╡ 71c9788c-0aeb-11eb-28d2-8dcc3f6abacd
 md"""
@@ -177,7 +185,7 @@ md"""
 """
 
 # ╔═╡ 69151ce6-0aeb-11eb-3a53-290ba46add96
-
+Coordinate(0,0) + rand(possible_moves)
 
 # ╔═╡ 3eb46664-0954-11eb-31d8-d9c0b74cf62b
 md"""
@@ -194,13 +202,12 @@ Possible steps:
 """
 
 # ╔═╡ edf86a0e-0a68-11eb-2ad3-dbf020037019
-# function trajectory(w::Coordinate, n::Int)
+function trajectory(w::Coordinate, n::Int)
+	trac = append!([w], rand(possible_moves, n))
+	trac = cumsum(trac)
+	return trac[2:end]
 	
-# 	return missing
-# end
-
-# ╔═╡ 44107808-096c-11eb-013f-7b79a90aaac8
-# test_trajectory = trajectory(Coordinate(4,4), 30) # uncomment to test
+end
 
 # ╔═╡ 478309f4-0a31-11eb-08ea-ade1755f53e0
 function plot_trajectory!(p::Plots.Plot, trajectory::Vector; kwargs...)
@@ -210,25 +217,6 @@ function plot_trajectory!(p::Plots.Plot, trajectory::Vector; kwargs...)
 		linealpha=LinRange(1.0, 0.2, length(trajectory)),
 		kwargs...)
 end
-
-# ╔═╡ 87ea0868-0a35-11eb-0ea8-63e27d8eda6e
-try
-	p = plot(ratio=1, size=(650, 200))
-	plot_trajectory!(p, test_trajectory; color="black", showaxis=false, axis=nothing, linewidth=4)
-	p
-catch
-end
-
-# ╔═╡ 51788e8e-0a31-11eb-027e-fd9b0dc716b5
-# 	let
-# 		long_trajectory = trajectory(Coordinate(4,4), 1000)
-
-# 		p = plot(ratio=1)
-# 		plot_trajectory!(p, long_trajectory)
-# 		p
-# 	end
-
-# ^ uncomment to visualize a trajectory
 
 # ╔═╡ 3ebd436c-0954-11eb-170d-1d468e2c7a37
 md"""
@@ -251,9 +239,6 @@ end
 ```
 """
 
-# ╔═╡ dcefc6fe-0a3f-11eb-2a96-ddf9c0891873
-
-
 # ╔═╡ b4d5da4a-09a0-11eb-1949-a5807c11c76c
 md"""
 #### Exercise 1.5
@@ -267,13 +252,20 @@ One relatively simple boundary condition is a **collision boundary**:
 """
 
 # ╔═╡ 0237ebac-0a69-11eb-2272-35ea4e845d84
-# function collide_boundary(c::Coordinate, L::Number)
-	
-# 	return missing
-# end
+function collide_boundary(c::Coordinate, L::Number)
+	x = c.x
+	y = c.y
+	if c.x > L
+		x = L	
+	end
+	if c.y > L
+		y = L
+	end
+	return Coordinate(x, y)
+end
 
 # ╔═╡ ad832360-0a40-11eb-2857-e7f0350f3b12
-# collide_boundary(Coordinate(12,4), 10) # uncomment to test
+collide_boundary(Coordinate(9,9), 10) # uncomment to test
 
 # ╔═╡ b4ed2362-09a0-11eb-0be9-99c91623b28f
 md"""
@@ -282,11 +274,47 @@ md"""
 
 """
 
+# ╔═╡ ce8841b9-75b3-4362-bd30-93b74a73aad5
+accumulate((x,y) -> collide_boundary(+(x, y), 2), [Coordinate(2,2), Coordinate(1,1)], init=origin)
+
 # ╔═╡ 0665aa3e-0a69-11eb-2b5d-cd718e3c7432
-# function trajectory(c::Coordinate, n::Int, L::Number)
+function trajectory(c::Coordinate, n::Int, L::Number)
+
+	trac = accumulate((x, y) -> collide_boundary(x+y, L), rand(possible_moves, n), init=c)
+	return trac
 	
-# 	return missing
-# end
+end
+
+# ╔═╡ 44107808-096c-11eb-013f-7b79a90aaac8
+test_trajectory = trajectory(Coordinate(4,4), 30) # uncomment to test
+
+# ╔═╡ 87ea0868-0a35-11eb-0ea8-63e27d8eda6e
+try
+	p = plot(ratio=1, size=(650, 200))
+	plot_trajectory!(p, test_trajectory; color="black", showaxis=false, axis=nothing, linewidth=4)
+	p
+catch
+end
+
+# ╔═╡ 51788e8e-0a31-11eb-027e-fd9b0dc716b5
+let
+	long_trajectory = trajectory(Coordinate(4,4), 1000)
+
+	p = plot(ratio=1)
+	plot_trajectory!(p, long_trajectory)
+	p
+end
+
+# ^ uncomment to visualize a trajectory
+
+# ╔═╡ dcefc6fe-0a3f-11eb-2a96-ddf9c0891873
+let
+	p = plot()
+	for i in 1:10
+		plot_trajectory!(p, trajectory(origin, 1000))
+	end
+	p
+end
 
 # ╔═╡ 3ed06c80-0954-11eb-3aee-69e4ccdc4f9d
 md"""
@@ -302,8 +330,8 @@ Let's define a type `Agent`. `Agent` contains a `position` (of type `Coordinate`
 # ╔═╡ 35537320-0a47-11eb-12b3-931310f18dec
 @enum InfectionStatus S I R
 
-# ╔═╡ cf2f3b98-09a0-11eb-032a-49cc8c15e89c
-# define agent struct here:
+# ╔═╡ 8dc359d8-7d60-42fc-a4da-7aa73fcc8d8e
+S
 
 # ╔═╡ 814e888a-0954-11eb-02e5-0964c7410d30
 md"""
@@ -312,15 +340,6 @@ md"""
 
 It returns a `Vector` of `N` randomly generated `Agent`s. Their coordinates are randomly sampled in the ``[-L,L] \times [-L,L]`` box, and the agents are all susceptible, except one, chosen at random, which is infectious.
 """
-
-# ╔═╡ 0cfae7ba-0a69-11eb-3690-d973d70e47f4
-# function initialize(N::Number, L::Number)
-	
-# 	return missing
-# end
-
-# ╔═╡ 1d0f8eb4-0a46-11eb-38e7-63ecbadbfa20
-# initialize(3, 10)
 
 # ╔═╡ e0b0880c-0a47-11eb-0db2-f760bbbf9c11
 # Color based on infection status
@@ -332,12 +351,6 @@ else
 	"green"
 end
 
-# ╔═╡ b5a88504-0a47-11eb-0eda-f125d419e909
-# position(a::Agent) = a.position # uncomment this line
-
-# ╔═╡ 87a4cdaa-0a5a-11eb-2a5e-cfaf30e942ca
-# color(a::Agent) = color(a.status) # uncomment this line
-
 # ╔═╡ 49fa8092-0a43-11eb-0ba9-65785ac6a42f
 md"""
 #### Exercise 2.2
@@ -345,19 +358,6 @@ md"""
 
 You can use the keyword argument `c=color.(agents)` inside your call to the plotting function make the point colors correspond to the infection statuses. Don't forget to use `ratio=1`.
 """
-
-# ╔═╡ 1ccc961e-0a69-11eb-392b-915be07ef38d
-# function visualize(agents::Vector, L)
-	
-# 	return missing
-# end
-
-# ╔═╡ 1f96c80a-0a46-11eb-0690-f51c60e57c3f
-let
-	N = 20
-	L = 10
-#	visualize(initialize(N, L), L) # uncomment this line!
-end
 
 # ╔═╡ f953e06e-099f-11eb-3549-73f59fed8132
 md"""
@@ -383,14 +383,9 @@ md"""
 
 Write a function `interact!` that takes two `Agent`s and a `CollisionInfectionRecovery`, and:
 
-- If the agents are at the same spot, causes a susceptible agent to communicate the desease from an infectious one with the correct probability.
-- if the first agent is infectious, it recovers with some probability
-"""
+- If the agents are at the same spot, causes a susceptible agent to communicate the desease from an infectious source with the correct probability.
 
-# ╔═╡ d1bcd5c4-0a4b-11eb-1218-7531e367a7ff
-# function interact!(agent::Agent, source::Agent, infection::CollisionInfectionRecovery)
-	# missing
-# end
+"""
 
 # ╔═╡ 34778744-0a5f-11eb-22b6-abe8b8fc34fd
 md"""
@@ -407,12 +402,6 @@ Your turn!
 
 - return the array `agents` again.
 """
-
-# ╔═╡ 24fe0f1a-0a69-11eb-29fe-5fb6cbf281b8
-# function step!(agents::Vector, L::Number, infection::AbstractInfection)
-	
-# 	return missing
-# end
 
 # ╔═╡ 1fc3271e-0a45-11eb-0e8d-0fd355f5846b
 md"""
@@ -435,18 +424,7 @@ plot(plot_before, plot_after)
 pandemic = CollisionInfectionRecovery(0.5, 0.00001)
 
 # ╔═╡ 4e7fd58a-0a62-11eb-1596-c717e0845bd5
-@bind k_sweeps Slider(1:10000, default=1000)
-
-# ╔═╡ 778c2490-0a62-11eb-2a6c-e7fab01c6822
-# let
-# 	N = 50
-# 	L = 40
-	
-# 	plot_before = plot(1:3) # replace with your code
-# 	plot_after = plot(1:3)
-	
-# 	plot(plot_before, plot_after)
-# end
+@bind k_sweeps Slider(1:10000, default=1000, show_value=true)
 
 # ╔═╡ e964c7f0-0a61-11eb-1782-0b728fab1db0
 md"""
@@ -460,13 +438,19 @@ Every time that you move the slider, a completely new simulation is created an r
 # ╔═╡ 4d83dbd0-0a63-11eb-0bdc-757f0e721221
 k_sweep_max = 10000
 
-# ╔═╡ ef27de84-0a63-11eb-177f-2197439374c5
-let
-	N = 50
-	L = 30
-	
-	# agents = initialize(N, L)
-	# compute k_sweep_max number of sweeps and plot the SIR
+# ╔═╡ 3211ae11-0ff8-4718-b9cc-bed339662e5e
+function count_sir(agents::Vector)
+	s, i, r = 0,0,0
+	for agent in agents
+		if agent.status == S
+			s += 1
+		elseif agent.status == I
+			i += 1
+		else
+			r += 1
+		end
+	end
+	return (s, i, r)
 end
 
 # ╔═╡ 201a3810-0a45-11eb-0ac9-a90419d0b723
@@ -510,9 +494,6 @@ md"""
 👉 With the parameters of Exercise 3.2, run 50 simulations. Plot $S$, $I$ and $R$ as a function of time for each of them (with transparency!). This should look qualitatively similar to what you saw in the previous homework. You probably need different `p_infection` and `p_recovery` values from last week. Why?
 """
 
-# ╔═╡ 601f4f54-0a45-11eb-3d6c-6b9ec75c6d4a
-
-
 # ╔═╡ b1b1afda-0a66-11eb-2988-752405815f95
 need_different_parameters_because = md"""
 i say so
@@ -537,21 +518,96 @@ We create a new agent type `SocialAgent` with fields `position`, `status`, `num_
 # ╔═╡ c704ea4c-0aec-11eb-2f2c-859c954aa520
 md"""define the `position` and `color` methods for `SocialAgent` as we did for `Agent`. This will allow the `visualize` function to work. on both kinds of Agents"""
 
-# ╔═╡ e97e39aa-0a5d-11eb-3d5f-f90a0acfe5a2
-# begin
-# 	position(a::SocialAgent) = ...
-# 	color(a::SocialAgent) = ...
-# end
-
 # ╔═╡ b554b654-0a41-11eb-0e0d-e57ff68ced33
 md"""
 👉 Create a function `initialize_social` that takes `N` and `L`, and creates N agents  within a 2L x 2L box, with `social_score`s chosen from 10 equally-spaced between 0.1 and 0.5. (see LinRange)
 """
 
+# ╔═╡ 3fec911d-2d2c-442f-86fe-bbae1afa182d
+range(.1,.5,length=10)
+
+# ╔═╡ 9c3637cd-69f5-4c91-b79d-1e7bc260e07f
+abstract type AbstractAgent end
+
+# ╔═╡ cf2f3b98-09a0-11eb-032a-49cc8c15e89c
+
+mutable struct Agent <: AbstractAgent
+	pos::Coordinate
+	status::InfectionStatus
+end
+
+# ╔═╡ 0cfae7ba-0a69-11eb-3690-d973d70e47f4
+function initialize(N::Number, L::Number)
+	init = [Agent(Coordinate(rand(-L:L), rand(-L:L)), S) for i in 1:N]
+	init[rand(1:N)].status = I
+	return init
+	
+end
+
+# ╔═╡ 1d0f8eb4-0a46-11eb-38e7-63ecbadbfa20
+a = initialize(3, 10)
+
+# ╔═╡ 87549a55-5051-4012-a8a1-7968b9c4ef6c
+count_sir(initialize(30,30))
+
+# ╔═╡ b5a88504-0a47-11eb-0eda-f125d419e909
+position(a::Agent) = a.pos # uncomment this line
+
+# ╔═╡ 87a4cdaa-0a5a-11eb-2a5e-cfaf30e942ca
+color(a::Agent) = color(a.status) # uncomment this line
+
+# ╔═╡ 9817fe8f-d7f9-43d0-b5b9-c3154df109d9
+mutable struct SocialAgent <: AbstractAgent
+	pos::Coordinate
+	status::InfectionStatus
+	num_infected::Int64
+	social_score::Float64
+end
+
+# ╔═╡ e97e39aa-0a5d-11eb-3d5f-f90a0acfe5a2
+begin
+ 	position(a::SocialAgent) = a.pos
+ 	color(a::SocialAgent) = color(a.status)
+end
+
+# ╔═╡ 6ea5fc03-c6da-4b75-82f7-c3d4385fd83d
+broadcast(a -> a.y, position.(a))
+
+# ╔═╡ 1ccc961e-0a69-11eb-392b-915be07ef38d
+function visualize(agents::Vector, L)
+	p = plot()
+	xlims!(-L, L)
+	ylims!(-L, L)
+	positions = position.(agents)
+	scatter!(broadcast(a -> a.x, positions), broadcast(a -> a.y, positions), c=color.(agents), legend=false)
+ 	return p
+end
+
+# ╔═╡ 1f96c80a-0a46-11eb-0690-f51c60e57c3f
+let
+	N = 20
+	L = 10
+	visualize(initialize(N, L), L) # uncomment this line!
+end
+
+# ╔═╡ d1bcd5c4-0a4b-11eb-1218-7531e367a7ff
+function interact!(agent::Agent, source::Agent, infection::CollisionInfectionRecovery)
+	if position(agent) == position(source) && agent.status == S::InfectionStatus && source.status == I::InfectionStatus
+		if rand() < infection.p_infection
+			agent.status = I
+		end
+	end
+		
+	# missing
+end
+
 # ╔═╡ 40c1c1d6-0a69-11eb-3913-59e9b9ec4332
-# function initialize_social(N, L)
-# 	return missing
-# end
+function initialize_social(N, L)
+
+	init = [SocialAgent(Coordinate(rand(-L:L), rand(-L:L)), S, 0, rand(range(.1 ,.5, length=5))) for i in 1:N]
+	init[rand(1:N)].status = I
+	return init
+end
 
 # ╔═╡ 18ac9926-0aed-11eb-034f-e9849b71c9ac
 md"""
@@ -571,10 +627,84 @@ Not all two agents who end up in the same grid point may actually interact in an
 """
 
 # ╔═╡ 465e918a-0a69-11eb-1b59-01150b4b0f36
-# function interact!(agent::SocialAgent, source::SocialAgent, infection::CollisionInfectionRecovery)
+function interact!(agent::SocialAgent, source::SocialAgent, infection::CollisionInfectionRecovery)
+
+	risk = agent.social_score + source.social_score
+	if position(agent) == position(source) && agent.status == S::InfectionStatus && source.status == I::InfectionStatus && rand() < risk && rand() < infection.p_infection
+			
+		agent.status = I
+		source.num_infected += 1
+		
+	end
+end
+
+# ╔═╡ 24fe0f1a-0a69-11eb-29fe-5fb6cbf281b8
+function step!(agents::Vector, L::Number, infection::AbstractInfection)
+	index = rand(1:length(agents))
+	source = agents[index]
+	source.pos = collide_boundary(position(source) + rand(possible_moves), L)
+	for i in 1:length(agents)
+		if i == index
+			continue
+		end
+		interact!(agents[i], source, infection)
+	end
+	if rand() < infection.p_recovery
+		source.status = R
+	end
+	return agents
+			
+end
+
+# ╔═╡ 40369221-4b03-4e14-9299-dd64aa6436f0
+function sweep!(agents::Vector, L::Number, infection::AbstractInfection)
+	N = length(agents)
+	for i in 1:N
+		agents = step!(agents, L, infection)
+	end
+	return agents
+end
+
+# ╔═╡ 778c2490-0a62-11eb-2a6c-e7fab01c6822
+let
 	
-# 	# your code here
-# end
+	N = 50
+	L = 40
+	agents = initialize(N, L)
+	plot_before = visualize(agents, L)
+	for i in 1:k_sweeps
+		agents = sweep!(agents, L, pandemic)
+	end
+	plot_after = visualize(agents, L)
+	
+	plot(plot_before, plot_after)
+end
+
+# ╔═╡ ef27de84-0a63-11eb-177f-2197439374c5
+let
+	N = 50
+	L = 30
+	s , i, r = [N-1], [1], [0]
+	agents = initialize(N, L)
+	for j in 1:k_sweep_max
+		agents = sweep!(agents, L, pandemic)
+		s1, i1, r1 = count_sir(agents)
+		s = push!(s, s1)
+		r = push!(r, r1)
+		i = push!(i, i1)
+	end
+	p = plot()
+	plot!(p, 0:k_sweep_max, s, c=:blue)
+	plot!(p, 0:k_sweep_max, i, c=:red)
+	plot!(p, 0:k_sweep_max, r, c=:green)
+	p
+end
+
+# ╔═╡ a6be56b0-9428-45a0-8a62-2d9e1d7894dd
+step!
+
+# ╔═╡ bae17030-544e-4d1d-b020-828bbe67ddc5
+sweep!
 
 # ╔═╡ a885bf78-0a5c-11eb-2383-9d74c8765847
 md"""
@@ -595,13 +725,26 @@ let
 	N = 50
 	L = 40
 
-	# global social_agents = initialize_social(N, L)
-	Ss, Is, Rs = [], [], []
+	social_agents = initialize_social(N, L)
+	s, i, r = [], [], []
 	
 	Tmax = 200
 	
 	@gif for t in 1:Tmax
+		for i in 1:50N
+			social_agents = step!(social_agents, L , pandemic)
+		end
+		
+		s1, i1, r1 = count_sir(social_agents)
+		s = push!(s, s1)
+		r = push!(r, r1)
+		i = push!(i, i1)
 
+		plot_left = visualize(social_agents, L)
+		plot_right = plot(1:t, s, c=:blue, label="susceptible")
+		plot!(plot_right, 1:t, i, c=:red, label="infectious")
+		plot!(plot_right, 1:t, r, c=:green, label="recovered")
+		plot(plot_left, plot_right, size=(1000,500))
 		# 1. Step! a lot
 		# 2. Count S, I and R, push them to Ss Is Rs
 		# 3. call visualize on the agents,
@@ -617,7 +760,28 @@ md"""
 """
 
 # ╔═╡ faec52a8-0a60-11eb-082a-f5787b09d88c
+let
+	N = 50
+	L = 40
 
+	social_agents = initialize_social(N, L)
+	s, i, r = [], [], []
+	
+	Tmax = 200
+	
+	for t in 1:Tmax
+		for i in 1:50N
+			social_agents = step!(social_agents, L , pandemic)
+		end
+	end
+	p = plot()
+	xlabel!(p, "social_score")
+	ylabel!(p, "people infected")
+	for agent in social_agents
+		scatter!(p, [agent.social_score], [agent.num_infected], legend=false)
+	end
+	p
+end
 
 # ╔═╡ b5b4d834-0a41-11eb-1b18-1bd626d18934
 md"""
@@ -625,7 +789,59 @@ md"""
 """
 
 # ╔═╡ a83c96e2-0a5a-11eb-0e58-15b5dda7d2d2
+let
+	N = 50
+	L = 40
 
+	social_agents = initialize_social(N, L)
+	s, i, r = [], [], []
+	
+	Tmax = 200
+	
+	@gif for t in 1:Tmax
+		if t < 101
+			for i in 1:50N
+				social_agents = step!(social_agents, L , pandemic)
+			end
+		
+			s1, i1, r1 = count_sir(social_agents)
+			s = push!(s, s1)
+			r = push!(r, r1)
+			i = push!(i, i1)
+
+			plot_left = visualize(social_agents, L)
+			plot_right = plot(1:t, s, c=:blue, label="susceptible",lw=3)
+			plot!(plot_right, 1:t, i, c=:red, label="infectious",lw=3)
+			plot!(plot_right, 1:t, r, c=:green, label="recovered",lw=3)
+			plot(plot_left, plot_right, size=(1000,500))
+		# 1. Step! a lot
+		# 2. Count S, I and R, push them to Ss Is Rs
+		# 3. call visualize on the agents,
+		# 4. place the SIR plot next to visualize.
+		# plot(left, right, size=(600,300)) # final plot
+		else
+			for agent in social_agents
+				agent.social_score *= .1 
+			end
+			for i in 1:50N
+				social_agents = step!(social_agents, L , pandemic)
+			end
+			
+			s1, i1, r1 = count_sir(social_agents)
+			s = push!(s, s1)
+			r = push!(r, r1)
+			i = push!(i, i1)
+
+			
+			plot_left = visualize(social_agents, L)
+			plot_right = plot(1:t, s, c=:blue, label="susceptible",lw=3)
+			vline!(plot_right, [100], c=:black ,label="lockdown",lw=3)
+			plot!(plot_right, 1:t, i, c=:red, label="infectious",lw=3)
+			plot!(plot_right, 1:t, r, c=:green, label="recovered",lw=3)
+			plot(plot_left, plot_right, size=(1000,500))
+		end
+	end
+end
 
 # ╔═╡ 05fc5634-09a0-11eb-038e-53d63c3edaf2
 md"""
@@ -859,7 +1075,7 @@ else
 		elseif length(Set(result)) != N
 			keep_working(md"Make sure that you create `N` **new** `Agent`s. Do not repeat the same agent multiple times.")
 		elseif sum(a -> a.status == S, result) == N-1 && sum(a -> a.status == I, result) == 1
-			if 8 <= length(Set(a.position for a in result)) <= 9
+			if 8 <= length(Set(a.pos for a in result)) <= 9
 				correct()
 			else
 				keep_working(md"The coordinates are not correctly sampled within the box.")
@@ -874,9 +1090,6 @@ end
 bigbreak = html"<br><br><br><br>";
 
 # ╔═╡ fcafe15a-0a66-11eb-3ed7-3f8bbb8f5809
-bigbreak
-
-# ╔═╡ ed2d616c-0a66-11eb-1839-edf8d15cf82a
 bigbreak
 
 # ╔═╡ c2633a8b-374c-40a7-a827-b186d423fee5
@@ -918,6 +1131,7 @@ version = "3.3.3"
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -982,6 +1196,7 @@ version = "3.43.0"
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[Contour]]
 deps = ["StaticArrays"]
@@ -1024,8 +1239,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1050,6 +1266,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1238,10 +1457,12 @@ version = "0.15.15"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1250,6 +1471,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1334,6 +1556,7 @@ version = "1.0.3"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1351,6 +1574,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[NaNMath]]
 git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
@@ -1359,6 +1583,7 @@ version = "1.0.0"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1369,10 +1594,12 @@ version = "1.3.5+1"
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1418,6 +1645,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1497,6 +1725,7 @@ version = "1.3.0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -1567,6 +1796,7 @@ version = "0.6.7"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1583,6 +1813,7 @@ version = "1.7.0"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1775,6 +2006,7 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1791,6 +2023,7 @@ version = "0.15.1+0"
 [[libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1813,10 +2046,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1839,10 +2074,11 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╟─19fe1ee8-0970-11eb-2a0d-7d25e7d773c6
-# ╟─1bba5552-0970-11eb-1b9a-87eeee0ecc36
+# ╠═1bba5552-0970-11eb-1b9a-87eeee0ecc36
 # ╟─49567f8e-09a2-11eb-34c1-bb5c0b642fe8
+# ╠═9025aaaf-95ec-4094-8a8c-c48d0951926e
 # ╟─181e156c-0970-11eb-0b77-49b143cc0fc0
-# ╠═1f299cc6-0970-11eb-195b-3f951f92ceeb
+# ╟─1f299cc6-0970-11eb-195b-3f951f92ceeb
 # ╟─2848996c-0970-11eb-19eb-c719d797c322
 # ╠═2dcb18d0-0970-11eb-048a-c1734c6db842
 # ╟─69d12414-0952-11eb-213d-2f9e13e4b418
@@ -1873,7 +2109,7 @@ version = "0.9.1+5"
 # ╠═44107808-096c-11eb-013f-7b79a90aaac8
 # ╟─87ea0868-0a35-11eb-0ea8-63e27d8eda6e
 # ╟─058e3f84-0a34-11eb-3f87-7118f14e107b
-# ╠═478309f4-0a31-11eb-08ea-ade1755f53e0
+# ╟─478309f4-0a31-11eb-08ea-ade1755f53e0
 # ╠═51788e8e-0a31-11eb-027e-fd9b0dc716b5
 # ╟─3ebd436c-0954-11eb-170d-1d468e2c7a37
 # ╠═dcefc6fe-0a3f-11eb-2a96-ddf9c0891873
@@ -1881,14 +2117,16 @@ version = "0.9.1+5"
 # ╠═0237ebac-0a69-11eb-2272-35ea4e845d84
 # ╠═ad832360-0a40-11eb-2857-e7f0350f3b12
 # ╟─b4ed2362-09a0-11eb-0be9-99c91623b28f
+# ╠═ce8841b9-75b3-4362-bd30-93b74a73aad5
 # ╠═0665aa3e-0a69-11eb-2b5d-cd718e3c7432
-# ╟─ed2d616c-0a66-11eb-1839-edf8d15cf82a
 # ╟─3ed06c80-0954-11eb-3aee-69e4ccdc4f9d
+# ╠═8dc359d8-7d60-42fc-a4da-7aa73fcc8d8e
 # ╠═35537320-0a47-11eb-12b3-931310f18dec
 # ╠═cf2f3b98-09a0-11eb-032a-49cc8c15e89c
 # ╟─814e888a-0954-11eb-02e5-0964c7410d30
 # ╠═0cfae7ba-0a69-11eb-3690-d973d70e47f4
 # ╠═1d0f8eb4-0a46-11eb-38e7-63ecbadbfa20
+# ╠═6ea5fc03-c6da-4b75-82f7-c3d4385fd83d
 # ╟─4fac0f36-0a59-11eb-03d0-632dc9db063a
 # ╠═e0b0880c-0a47-11eb-0db2-f760bbbf9c11
 # ╠═b5a88504-0a47-11eb-0eda-f125d419e909
@@ -1904,12 +2142,15 @@ version = "0.9.1+5"
 # ╠═d1bcd5c4-0a4b-11eb-1218-7531e367a7ff
 # ╟─34778744-0a5f-11eb-22b6-abe8b8fc34fd
 # ╠═24fe0f1a-0a69-11eb-29fe-5fb6cbf281b8
+# ╠═40369221-4b03-4e14-9299-dd64aa6436f0
 # ╟─1fc3271e-0a45-11eb-0e8d-0fd355f5846b
 # ╟─18552c36-0a4d-11eb-19a0-d7d26897af36
 # ╠═4e7fd58a-0a62-11eb-1596-c717e0845bd5
 # ╠═778c2490-0a62-11eb-2a6c-e7fab01c6822
 # ╟─e964c7f0-0a61-11eb-1782-0b728fab1db0
 # ╠═4d83dbd0-0a63-11eb-0bdc-757f0e721221
+# ╠═3211ae11-0ff8-4718-b9cc-bed339662e5e
+# ╠═87549a55-5051-4012-a8a1-7968b9c4ef6c
 # ╠═ef27de84-0a63-11eb-177f-2197439374c5
 # ╟─8475baf0-0a63-11eb-1207-23f789d00802
 # ╟─201a3810-0a45-11eb-0ac9-a90419d0b723
@@ -1920,19 +2161,23 @@ version = "0.9.1+5"
 # ╠═269955e4-0a46-11eb-02cc-1946dc918bfa
 # ╠═4d4548fe-0a66-11eb-375a-9313dc6c423d
 # ╟─20477a78-0a45-11eb-39d7-93918212a8bc
-# ╠═601f4f54-0a45-11eb-3d6c-6b9ec75c6d4a
 # ╠═b1b1afda-0a66-11eb-2988-752405815f95
 # ╟─e84e0944-0a66-11eb-12d3-e12ae10f39a6
 # ╟─05c80a0c-09a0-11eb-04dc-f97e306f1603
 # ╟─b53d5608-0a41-11eb-2325-016636a22f71
 # ╠═1b5e72c6-0a42-11eb-3884-a377c72270c7
+# ╠═9817fe8f-d7f9-43d0-b5b9-c3154df109d9
 # ╟─c704ea4c-0aec-11eb-2f2c-859c954aa520
 # ╠═e97e39aa-0a5d-11eb-3d5f-f90a0acfe5a2
 # ╟─b554b654-0a41-11eb-0e0d-e57ff68ced33
+# ╠═3fec911d-2d2c-442f-86fe-bbae1afa182d
 # ╠═40c1c1d6-0a69-11eb-3913-59e9b9ec4332
+# ╠═9c3637cd-69f5-4c91-b79d-1e7bc260e07f
 # ╟─18ac9926-0aed-11eb-034f-e9849b71c9ac
 # ╟─b56ba420-0a41-11eb-266c-719d39580fa9
 # ╠═465e918a-0a69-11eb-1b59-01150b4b0f36
+# ╠═a6be56b0-9428-45a0-8a62-2d9e1d7894dd
+# ╠═bae17030-544e-4d1d-b020-828bbe67ddc5
 # ╟─a885bf78-0a5c-11eb-2383-9d74c8765847
 # ╠═1f172700-0a42-11eb-353b-87c0039788bd
 # ╟─b59de26c-0a41-11eb-2c67-b5f3c7780c91

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -21,8 +21,17 @@ begin
 	using PlutoUI
 end
 
+# ╔═╡ 8f781036-7aaf-4bac-9a19-a283ce4ba2c5
+using Folds
+
+# ╔═╡ 99446c0c-be88-421e-a503-638ccd15d603
+using BenchmarkTools
+
 # ╔═╡ 048890ee-106a-11eb-1a81-5744150543e8
 md"_homework 8, version 3_"
+
+# ╔═╡ e1db4665-f096-457c-bfc7-0b90e5ac4fe2
+PlutoUI.TableOfContents()
 
 # ╔═╡ 0579e962-106a-11eb-26b5-2160f461f4cc
 md"""
@@ -104,8 +113,8 @@ md"""
 
 # ╔═╡ d217a4b6-12e8-11eb-29ce-53ae143a39cd
 function finite_difference_slope(f::Function, a, h=1e-3)
-	
-	return missing
+	slope = (f(a+h) - f(a)) / h
+	return slope
 end
 
 # ╔═╡ f0576e48-1261-11eb-0579-0b1372565ca7
@@ -118,8 +127,8 @@ md"""
 
 # ╔═╡ cbf0a27a-12e8-11eb-379d-85550b942ceb
 function tangent_line(f, a, h)
-	
-	return missing
+	tangent = x -> finite_difference_slope(f,a,h) * (x - a) + f(a) 
+	return tangent
 end
 
 # ╔═╡ 2b79b698-10b9-11eb-3bde-53fc1c48d5f7
@@ -181,7 +190,7 @@ This antiderivative problem is illustrated below. The only information that we h
 wavy_deriv(x) = .3x^2 - 3.2x + 7;
 
 # ╔═╡ 0b4e8cdc-10bd-11eb-296c-d51dc242a372
-@bind a_euler Slider(zeroten, default=1)
+@bind a_euler Slider(zeroten, default=1, show_value=true)
 
 # ╔═╡ 70df9a48-10bb-11eb-0b95-95a224b45921
 let
@@ -216,8 +225,8 @@ Using this formula, we only need to know the _value_ ``f(a)`` and the _slope_ ``
 # ╔═╡ fa320028-12c4-11eb-0156-773e2aba8e58
 function euler_integrate_step(fprime::Function, fa::Number, 
 		a::Number, h::Number)
-	
-	return missing
+	f_next = fa + fprime(a+h) * h
+	return f_next
 end
 
 # ╔═╡ 2335cae6-112f-11eb-3c2c-254e82014567
@@ -229,10 +238,12 @@ md"""
 function euler_integrate(fprime::Function, fa::Number, 
 		T::AbstractRange)
 	
-	a0 = T[1]
 	h = step(T)
-	
-	return missing
+	vals = [Float64(fa)]
+	for a in T
+		push!(vals, euler_integrate_step(fprime, vals[end], a, h))
+	end
+	return vals 
 end
 
 # ╔═╡ 4d0efa66-12c6-11eb-2027-53d34c68d5b0
@@ -251,7 +262,7 @@ euler_test = let
 end
 
 # ╔═╡ ab72fdbe-10be-11eb-3b33-eb4ab41730d6
-@bind N_euler Slider(2:40)
+@bind N_euler Slider(2:40, show_value=true)
 
 # ╔═╡ 990236e0-10be-11eb-333a-d3080a224d34
 let
@@ -331,9 +342,9 @@ function euler_SIR_step(β, γ, sir_0::Vector, h::Number)
 	s, i, r = sir_0
 	
 	return [
-		missing,
-		missing,
-		missing,
+		sir_0[1] - h * β * sir_0[1] * sir_0[2],
+		sir_0[2] + h * (β * sir_0[1] * sir_0[2] - γ * sir_0[2] ),
+		sir_0[3] + h * γ * sir_0[2],
 	]
 end
 
@@ -353,10 +364,12 @@ You should return a vector of vectors: a 3-element vector for each point in time
 function euler_SIR(β, γ, sir_0::Vector, T::AbstractRange)
 	# T is a range, you get the step size and number of steps like so:
 	h = step(T)
-	
+	sir = [Float64.(sir_0)]
 	num_steps = length(T)
-	
-	return missing
+	for i in 1:num_steps - 1
+		push!(sir, euler_SIR_step(β, γ, sir[end], h))
+	end
+	return sir
 end
 
 # ╔═╡ 4b791b76-12cd-11eb-1260-039c938f5443
@@ -427,8 +440,8 @@ You should use **anonymous functions** for this. These have the form `x -> x^2`,
 
 # ╔═╡ bd8522c6-12e8-11eb-306c-c764f78486ef
 function ∂x(f::Function, a, b)
-	
-	return missing
+	∇x = .000001
+	return (f(a + ∇x, b) - f(a - ∇x, b)) / 2∇x
 end
 
 # ╔═╡ 321964ac-126d-11eb-0a04-0d3e3fb9b17c
@@ -439,8 +452,8 @@ end
 
 # ╔═╡ b7d3aa8c-12e8-11eb-3430-ff5d7df6a122
 function ∂y(f::Function, a, b)
-	
-	return missing
+	∇y = .000001
+	return (f(a, b + ∇y) - f(a, b - ∇y)) / 2∇y
 end
 
 # ╔═╡ a15509ee-126c-11eb-1fa3-cdda55a47fcb
@@ -458,7 +471,7 @@ md"""
 # ╔═╡ adbf65fe-12e8-11eb-04e9-3d763ba91a63
 function gradient(f::Function, a, b)
 	
-	return missing
+	return [∂x(f, a, b), ∂y(f ,a, b)]
 end
 
 # ╔═╡ 66b8e15e-126c-11eb-095e-39c2f6abc81d
@@ -485,8 +498,8 @@ We want to minimize a 1D function, i.e. a function $f: \mathbb{R} \to \mathbb{R}
 
 # ╔═╡ a7f1829c-12e8-11eb-15a1-5de40ed92587
 function gradient_descent_1d_step(f, x0; η=0.01)
-	
-	return missing
+	x = x0 - finite_difference_slope(f, x0, .0000001) * η
+	return x
 end
 
 # ╔═╡ d33271a2-12df-11eb-172a-bd5600265f49
@@ -498,7 +511,7 @@ let
 end
 
 # ╔═╡ 8ae98c74-12e0-11eb-2802-d9a544d8b7ae
-@bind N_gradient_1d Slider(0:20)
+@bind N_gradient_1d Slider(0:20, show_value=true)
 
 # ╔═╡ a53cf3f8-12e1-11eb-0b0c-2b794a7ac841
 md" ``x_0 = `` $(@bind x0_gradient_1d Slider(-3:.01:1.5, default=-1, show_value=true))"
@@ -539,8 +552,11 @@ md"""
 
 # ╔═╡ 9489009a-12e8-11eb-2fb7-97ba0bdf339c
 function gradient_descent_1d(f, x0; η=0.01, N_steps=1000)
-	
-	return missing
+	x = x0
+	for i in 1:N_steps
+		x = gradient_descent_1d_step(f, x;η=η)
+	end
+	return x
 end
 
 # ╔═╡ 34dc4b02-1248-11eb-26b2-5d2610cfeb41
@@ -570,14 +586,17 @@ Multivariable calculus tells us that the gradient $\nabla f(a, b)$ at a point $(
 
 # ╔═╡ 852be3c4-12e8-11eb-1bbb-5fbc0da74567
 function gradient_descent_2d_step(f, x0, y0; η=0.01)
-	
-	return missing
+	pos  = [x0, y0] .- η .* gradient(f, x0, y0)
+	return pos
 end
 
 # ╔═╡ 8a114ca8-12e8-11eb-2de6-9149d1d3bc3d
-function gradient_descent_2d(f, x0, y0; η=0.01)
-	
-	return missing
+function gradient_descent_2d(f, x0, y0; η=0.01, steps=1000)
+	pos = [x0, y0]
+	for i in 1:steps
+		pos = gradient_descent_2d_step(f, pos[1], pos[2];η=η)
+	end
+	return pos
 end
 
 # ╔═╡ 4454c2b2-12e3-11eb-012c-c362c4676bf6
@@ -601,7 +620,7 @@ We also prepared a 3D visualisation if you like! It's a bit slow...
 """
 
 # ╔═╡ 605aafa4-12e7-11eb-2d13-7f7db3fac439
-run_3d_visualisation = false
+run_3d_visualisation = true
 
 # ╔═╡ 5e0f16b4-12e3-11eb-212f-e565f97adfed
 function gradient_2d_viz_3d(N_gradient_2d, x0, y0)
@@ -747,8 +766,8 @@ $$\mathcal{L}(\mu, \sigma) := \sum_i [f_{\mu, \sigma}(x_i) - y_i]^2$$
 
 # ╔═╡ 2fc55daa-124f-11eb-399e-659e59148ef5
 function loss_dice(μ, σ)
-	
-	return missing
+	loss = sum(x -> x^2, gauss.(dice_x, μ, σ) .- dice_y)
+	return loss
 end
 
 # ╔═╡ 3a6ec2e4-124f-11eb-0f68-791475bab5cd
@@ -763,9 +782,8 @@ md"""
 # ╔═╡ a150fd60-124f-11eb-35d6-85104bcfd0fe
 found_μ, found_σ = let
 	
-	# your code here
+	gradient_descent_2d(loss_dice, 30, 1; η=0.05, steps=50000 )
 	
-	missing, missing
 end
 
 # ╔═╡ ac320522-124b-11eb-1552-51c2adaf2521
@@ -849,14 +867,40 @@ This time, instead of comparing two vectors of numbers, we need to compare two v
 
 """
 
-# ╔═╡ 754b5368-12e8-11eb-0763-e3ec56562c5f
-function loss_sir(β, γ)
-	
-	return missing
+# ╔═╡ 1148e56e-080e-40af-8b25-baad79cb0b43
+sum(x -> sum(x.^2), [[1,2,1],[2,2]])
+
+# ╔═╡ 1bcc5889-99d0-47af-ae8e-c27c4693c7f9
+let
+	@btime sum(x -> gcd(x, 42), 1:1_000_000)
 end
 
-# ╔═╡ ee20199a-12d4-11eb-1c2c-3f571bbb232e
-loss_sir(guess_β, guess_γ)
+# ╔═╡ 6878ba01-cf2a-4369-87b0-151994672d2b
+let
+	@btime Folds.sum(x -> gcd(x, 42), 1:1_000_000)
+end
+
+# ╔═╡ 754b5368-12e8-11eb-0763-e3ec56562c5f
+function loss_sir(β, γ)
+	loss = sum(x -> sum(x.^2), spatial_results .- euler_SIR(β, γ, spatial_results[1], spatial_T))
+	return loss
+end
+
+# ╔═╡ 07314196-cb4d-4bd8-9b2d-8d3829ad8b2c
+let
+	@btime loss_sir(1,1)
+end
+
+# ╔═╡ ae267d58-e38d-4395-b633-5bc154766820
+function loss_sir_parallel(β, γ)
+	loss = Folds.sum(x -> sum(x.^2), spatial_results .- euler_SIR(β, γ, spatial_results[1], spatial_T))
+	return loss
+end
+
+# ╔═╡ 441942bd-fb66-4e9f-8ad8-7d2e4c69f7f8
+let
+	@btime loss_sir_parallel(1,1)
+end
 
 # ╔═╡ 38b09bd8-12d5-11eb-2f7b-579e9db3973d
 md"""
@@ -866,9 +910,7 @@ md"""
 # ╔═╡ 6e1b5b6a-12e8-11eb-3655-fb10c4566cdc
 found_β, found_γ = let
 	
-	# your code here
-	
-	missing, missing
+	gradient_descent_2d(loss_sir, .01, .001; η=1e-8, steps=10000 )
 end
 
 # ╔═╡ 496b8816-12d3-11eb-3cec-c777ba81eb60
@@ -896,6 +938,9 @@ let
 	
 	as_svg(p)
 end
+
+# ╔═╡ aa3e2ebb-8594-4348-b2da-989795929ac1
+(.019,.0026)
 
 # ╔═╡ b94b7610-106d-11eb-2852-25337ce6ec3a
 if student.name == "Jazzy Doe" || student.kerberos_id == "jazz"
@@ -1184,11 +1229,15 @@ TODO = html"<span style='display: inline; font-size: 2em; color: purple; font-we
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+Folds = "41a02a25-b8f0-4f67-bc48-60067656b558"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
+BenchmarkTools = "~1.3.1"
+Folds = "~0.2.8"
 Plots = "~1.29.0"
 PlutoUI = "~0.7.38"
 """
@@ -1203,20 +1252,49 @@ git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
 uuid = "6e696c72-6542-2067-7265-42206c756150"
 version = "1.1.4"
 
+[[Accessors]]
+deps = ["Compat", "CompositionsBase", "ConstructionBase", "Dates", "Future", "LinearAlgebra", "MacroTools", "Requires", "Test"]
+git-tree-sha1 = "aab1c3d790a1b26033d32d5a1bf06a3c2a200222"
+uuid = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
+version = "0.1.12"
+
 [[Adapt]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "af92965fb30777147966f58acb05da51c5616b5f"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
 version = "3.3.3"
 
+[[ArgCheck]]
+git-tree-sha1 = "a3a402a35a2f7e0b87828ccabbd5ebfbebe356b4"
+uuid = "dce04be8-c92d-5529-be00-80e4d2c0e197"
+version = "2.3.0"
+
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
+[[BangBang]]
+deps = ["Compat", "ConstructionBase", "Future", "InitialValues", "LinearAlgebra", "Requires", "Setfield", "Tables", "ZygoteRules"]
+git-tree-sha1 = "b15a6bc52594f5e4a3b825858d1089618871bf9d"
+uuid = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
+version = "0.3.36"
+
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[Baselet]]
+git-tree-sha1 = "aebf55e6d7795e02ca500a689d326ac979aaf89e"
+uuid = "9718e550-a3fa-408a-8086-8db961cd8217"
+version = "0.1.1"
+
+[[BenchmarkTools]]
+deps = ["JSON", "Logging", "Printf", "Profile", "Statistics", "UUIDs"]
+git-tree-sha1 = "4c10eee4af024676200bc7752e536f858c6b8f93"
+uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+version = "1.3.1"
 
 [[Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1275,6 +1353,18 @@ version = "3.43.0"
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
+
+[[CompositionsBase]]
+git-tree-sha1 = "455419f7e328a1a2493cabc6428d79e951349769"
+uuid = "a33af91c-f02d-484b-be07-31d278c5ca2b"
+version = "0.1.1"
+
+[[ConstructionBase]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "fb21ddd70a051d882a1686a5a550990bbe371a95"
+uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+version = "1.4.1"
 
 [[Contour]]
 deps = ["StaticArrays"]
@@ -1302,6 +1392,11 @@ version = "1.0.0"
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
+[[DefineSingletons]]
+git-tree-sha1 = "0fba8b706d0178b4dc7fd44a96a92382c9065c2c"
+uuid = "244e2a9f-e319-4986-a169-4d1fe445cd52"
+version = "0.1.2"
+
 [[DelimitedFiles]]
 deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
@@ -1317,8 +1412,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1332,6 +1428,11 @@ git-tree-sha1 = "bad72f730e9e91c08d9427d5e8db95478a3c323d"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.4.8+0"
 
+[[ExternalDocstrings]]
+git-tree-sha1 = "1224740fc4d07c989949e1c1b508ebd49a65a5f6"
+uuid = "e189563c-0753-4f5e-ad5c-be4293c83fb4"
+version = "0.1.1"
+
 [[FFMPEG]]
 deps = ["FFMPEG_jll"]
 git-tree-sha1 = "b57e3acbe22f8484b4b5ff66a7499717fe1a9cc8"
@@ -1344,11 +1445,20 @@ git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
 
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
+
 [[FixedPointNumbers]]
 deps = ["Statistics"]
 git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
+
+[[Folds]]
+deps = ["Accessors", "BangBang", "Baselet", "DefineSingletons", "Distributed", "ExternalDocstrings", "InitialValues", "MicroCollections", "Referenceables", "Requires", "Test", "ThreadedScans", "Transducers"]
+git-tree-sha1 = "638109532de382a1f99b1aae1ca8b5d08515d85a"
+uuid = "41a02a25-b8f0-4f67-bc48-60067656b558"
+version = "0.2.8"
 
 [[Fontconfig_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Expat_jll", "FreeType2_jll", "JLLWrappers", "Libdl", "Libuuid_jll", "Pkg", "Zlib_jll"]
@@ -1373,6 +1483,10 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
+
+[[Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[GLFW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
@@ -1456,6 +1570,11 @@ git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
 uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"
 version = "0.5.1"
 
+[[InitialValues]]
+git-tree-sha1 = "4da0f88e9a39111c2fa3add390ab15f3a44f3ca3"
+uuid = "22cec73e-a1b8-11e9-2c92-598750a2cf9c"
+version = "0.3.1"
+
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -1531,10 +1650,12 @@ version = "0.15.15"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1543,6 +1664,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1627,11 +1749,18 @@ version = "1.0.3"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
 uuid = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 version = "0.3.1"
+
+[[MicroCollections]]
+deps = ["BangBang", "InitialValues", "Setfield"]
+git-tree-sha1 = "6bb7786e4f24d44b4e29df03c69add1b63d88f01"
+uuid = "128add7d-3638-4c79-886c-908ea0c25c34"
+version = "0.1.2"
 
 [[Missings]]
 deps = ["DataAPI"]
@@ -1644,6 +1773,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[NaNMath]]
 git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
@@ -1652,6 +1782,7 @@ version = "1.0.0"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1662,10 +1793,12 @@ version = "1.3.5+1"
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1711,6 +1844,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1746,6 +1880,10 @@ version = "1.3.0"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
+[[Profile]]
+deps = ["Printf"]
+uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
+
 [[Qt5Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
 git-tree-sha1 = "c6c0f690d0cc7caddb74cef7aa847b824a16b256"
@@ -1776,6 +1914,12 @@ git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
 
+[[Referenceables]]
+deps = ["Adapt"]
+git-tree-sha1 = "e681d3bfa49cd46c3c161505caddf20f0e62aaa9"
+uuid = "42d2dcc6-99eb-4e98-b66c-637b7d73030e"
+version = "0.1.2"
+
 [[RelocatableFolders]]
 deps = ["SHA", "Scratch"]
 git-tree-sha1 = "cdbd3b1338c72ce29d9584fdbe9e9b70eeb5adca"
@@ -1790,6 +1934,7 @@ version = "1.3.0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -1799,6 +1944,12 @@ version = "1.1.0"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[Setfield]]
+deps = ["ConstructionBase", "Future", "MacroTools", "Requires"]
+git-tree-sha1 = "38d88503f695eb0301479bc9b0d4320b378bafe5"
+uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+version = "0.8.2"
 
 [[SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
@@ -1828,6 +1979,12 @@ deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jl
 git-tree-sha1 = "5ba658aeecaaf96923dce0da9e703bd1fe7666f9"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.1.4"
+
+[[SplittablesBase]]
+deps = ["Setfield", "Test"]
+git-tree-sha1 = "39c9f91521de844bad65049efd4f9223e7ed43f9"
+uuid = "171d559e-b47b-412a-8079-5efa626c420e"
+version = "0.1.14"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
@@ -1860,6 +2017,7 @@ version = "0.6.7"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1876,6 +2034,7 @@ version = "1.7.0"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1886,6 +2045,18 @@ version = "0.1.1"
 [[Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[ThreadedScans]]
+deps = ["ArgCheck"]
+git-tree-sha1 = "ca1ba3000289eacba571aaa4efcefb642e7a1de6"
+uuid = "24d252fe-5d94-4a69-83ea-56a14333d47a"
+version = "0.1.0"
+
+[[Transducers]]
+deps = ["Adapt", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "Requires", "Setfield", "SplittablesBase", "Tables"]
+git-tree-sha1 = "c76399a3bbe6f5a88faa33c8f8a65aa631d95013"
+uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
+version = "0.4.73"
 
 [[Tricks]]
 git-tree-sha1 = "6bac775f2d42a611cdfcd1fb217ee719630c4175"
@@ -2068,12 +2239,19 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e45044cd873ded54b6a5bac0eb5c971392cf1927"
 uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
 version = "1.5.2+0"
+
+[[ZygoteRules]]
+deps = ["MacroTools"]
+git-tree-sha1 = "8c1a8e4dfacb1fd631745552c8db35d0deb09ea0"
+uuid = "700de1a5-db45-46bc-99cf-38207098b444"
+version = "0.2.2"
 
 [[libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
@@ -2084,6 +2262,7 @@ version = "0.15.1+0"
 [[libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2106,10 +2285,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2133,8 +2314,9 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╟─048890ee-106a-11eb-1a81-5744150543e8
 # ╟─0565af4c-106a-11eb-0d38-2fb84493d86f
+# ╠═e1db4665-f096-457c-bfc7-0b90e5ac4fe2
 # ╟─0579e962-106a-11eb-26b5-2160f461f4cc
-# ╠═0587db1c-106a-11eb-0560-c3d53c516805
+# ╟─0587db1c-106a-11eb-0560-c3d53c516805
 # ╟─05976f0c-106a-11eb-03a4-0febbc18fae8
 # ╠═05b01f6e-106a-11eb-2a88-5f523fafe433
 # ╟─0d191540-106e-11eb-1f20-bf72a75fb650
@@ -2148,7 +2330,7 @@ version = "0.9.1+5"
 # ╟─0f0b7ec4-112c-11eb-3399-59e22df07355
 # ╠═cbf0a27a-12e8-11eb-379d-85550b942ceb
 # ╟─66198242-1262-11eb-1b0f-37c58199c754
-# ╟─abc54b82-10b9-11eb-1641-817e2f043d26
+# ╠═abc54b82-10b9-11eb-1641-817e2f043d26
 # ╟─3d44c264-10b9-11eb-0895-dbfc22ba0c37
 # ╠═2b79b698-10b9-11eb-3bde-53fc1c48d5f7
 # ╟─a732bbcc-112c-11eb-1d65-110c049e226c
@@ -2157,7 +2339,7 @@ version = "0.9.1+5"
 # ╟─327de976-10b9-11eb-1916-69ad75fc8dc4
 # ╟─43df67bc-10bb-11eb-1cbd-cd962a01e3ee
 # ╠═d5a8bd48-10bf-11eb-2291-fdaaff56e4e6
-# ╟─0b4e8cdc-10bd-11eb-296c-d51dc242a372
+# ╠═0b4e8cdc-10bd-11eb-296c-d51dc242a372
 # ╟─70df9a48-10bb-11eb-0b95-95a224b45921
 # ╟─1d8ce3d6-112f-11eb-1343-079c18cdc89c
 # ╠═fa320028-12c4-11eb-0156-773e2aba8e58
@@ -2167,7 +2349,7 @@ version = "0.9.1+5"
 # ╟─4d0efa66-12c6-11eb-2027-53d34c68d5b0
 # ╠═b74d94b8-10bf-11eb-38c1-9f39dfcb1096
 # ╟─15b50428-1264-11eb-163e-23e2f3590502
-# ╟─ab72fdbe-10be-11eb-3b33-eb4ab41730d6
+# ╠═ab72fdbe-10be-11eb-3b33-eb4ab41730d6
 # ╟─990236e0-10be-11eb-333a-d3080a224d34
 # ╟─d21fad2a-1253-11eb-304a-2bacf9064d0d
 # ╟─518fb3aa-106e-11eb-0fcd-31091a8f12db
@@ -2228,7 +2410,7 @@ version = "0.9.1+5"
 # ╠═6d1ee93e-1103-11eb-140f-63fca63f8b06
 # ╟─8261eb92-106e-11eb-2ccc-1348f232f5c3
 # ╠═65e691e4-124a-11eb-38b1-b1732403aa3d
-# ╟─6f4aa432-1103-11eb-13da-fdd9eefc7c86
+# ╠═6f4aa432-1103-11eb-13da-fdd9eefc7c86
 # ╠═dbe9635a-124b-11eb-111d-fb611954db56
 # ╟─ac320522-124b-11eb-1552-51c2adaf2521
 # ╟─57090426-124e-11eb-0a17-1566ae96b7c2
@@ -2249,7 +2431,7 @@ version = "0.9.1+5"
 # ╟─6faf4074-1266-11eb-1a0a-991fc2e991bb
 # ╟─826bb0dc-106e-11eb-29eb-03e7ddf9e4b5
 # ╠═04364dee-12cb-11eb-2f94-bfd3fb405907
-# ╠═249c297c-12ce-11eb-2054-d1e926335148
+# ╟─249c297c-12ce-11eb-2054-d1e926335148
 # ╟─c56cc19c-12ca-11eb-3c6c-7f3ea98eeb4e
 # ╟─496b8816-12d3-11eb-3cec-c777ba81eb60
 # ╟─480fde46-12d4-11eb-2dfb-1b71692c7420
@@ -2257,10 +2439,18 @@ version = "0.9.1+5"
 # ╟─a9630d28-12d2-11eb-196b-773d8498b0bb
 # ╟─23c53be4-12d4-11eb-1d39-8d11b4431993
 # ╟─6016fccc-12d4-11eb-0f58-b9cd331cc7b3
+# ╠═1148e56e-080e-40af-8b25-baad79cb0b43
+# ╠═8f781036-7aaf-4bac-9a19-a283ce4ba2c5
+# ╠═99446c0c-be88-421e-a503-638ccd15d603
+# ╠═1bcc5889-99d0-47af-ae8e-c27c4693c7f9
+# ╠═6878ba01-cf2a-4369-87b0-151994672d2b
+# ╠═07314196-cb4d-4bd8-9b2d-8d3829ad8b2c
+# ╠═441942bd-fb66-4e9f-8ad8-7d2e4c69f7f8
 # ╠═754b5368-12e8-11eb-0763-e3ec56562c5f
-# ╠═ee20199a-12d4-11eb-1c2c-3f571bbb232e
+# ╠═ae267d58-e38d-4395-b633-5bc154766820
 # ╟─38b09bd8-12d5-11eb-2f7b-579e9db3973d
 # ╠═6e1b5b6a-12e8-11eb-3655-fb10c4566cdc
+# ╠═aa3e2ebb-8594-4348-b2da-989795929ac1
 # ╟─106670f2-12d6-11eb-1854-5bf0fc6f4dfb
 # ╟─b94b7610-106d-11eb-2852-25337ce6ec3a
 # ╟─b94f9df8-106d-11eb-3be8-c5a1bb79d0d4

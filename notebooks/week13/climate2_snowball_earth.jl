@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -200,19 +200,6 @@ md"""
 The above are two section views of the surface z=f(y,a). Left: constant a.  Right: z =0.
 """
 
-# ╔═╡ 9bc33f22-c065-4c1d-b06f-78c70415a111
-# begin
-# 	#s1=surface(-5:.1:-.1, -4:.1:4, f, legend=false )
-# 	#s2=surface!(.00001:.1:4.1, -4:.1:4, f, legend=false )
-# 	surface(-6:.05:4, -5:.05:4, f, legend=false, alpha=.5 )
-	
-# 	plot!(  [0,-6 ], [1, -5  ], [0,0], c=:red) 
-# 	plot!(  [0,5 ], [-1, 4  ], [0,0], c=:red) 
-# 	xlabel!("y")
-# 	ylabel!("a")
-	
-# end
-
 # ╔═╡ 6f61180d-6900-48fa-998d-36110e79d2dc
 gr()
 
@@ -277,7 +264,7 @@ md"""
 ### Hysteresis: Increasing then decreasing ``a``
 Let's increase a by .25 from -4 to 4 then decrease from -4 to 4.
 Every time we change a, we let 10 units of time evolve, enough
-to reach the equilibriumf for that a, and watch the y values.
+to reach the equilibrium for that a, and watch the y values.
 
 We see that when -1<a<1 it's possible to be at the "negative" equilibrium
 or the "positive" equilibrium, depending on how you got there.
@@ -347,13 +334,14 @@ md"""
 ##  Review of the last climate lecture.
 
 Recall from [Lecture 20 (Part I)](https://www.youtube.com/watch?v=Gi4ZZVS2GLA&t=15s) that the the **zero-dimensional energy balance equation** is
-
+``
 \begin{gather}
 \color{brown}{C \frac{dT}{dt}}
 \; \color{black}{=} \; \color{orange}{\frac{(1 - α)S}{4}}
 \; \color{black}{-} \; \color{blue}{(A - BT)}
 \; \color{black}{+} \; \color{grey}{a \ln \left( \frac{[\text{CO}₂]}{[\text{CO}₂]_{\text{PI}}} \right)},
 \end{gather}
+``
 """
 
 # ╔═╡ b71fca45-9687-4a51-8e1c-1f413e83e58d
@@ -366,13 +354,13 @@ Today, we will ignore changes in CO₂, so that
 $\ln \left( \frac{ [\text{CO}₂]_{\text{PI}} }{[\text{CO}₂]_{\text{PI}}} \right) = \ln(1) = 0$
 
 and the model simplifies to
-
+``
 \begin{gather}
 \color{brown}{C \frac{dT}{dt}}
 \; \color{black}{=} \; \color{orange}{\frac{(1 - α)S}{4}}
 \; \color{black}{-} \; \color{blue}{(A - BT)}.
 \end{gather}
-
+``
 
 The dynamics of this **Ordinary Differential Equation (ODE)** are quite simple because it is *linear*: we can rewrite it in the form
 
@@ -582,7 +570,7 @@ Let's explore how this plays out with the non-linear ice-albedo feedback by vary
 
 # ╔═╡ 48431fc9-413f-4f72-8c6f-f48b42c29475
 begin
-	T0_slider = @bind T0_interact Slider(-60.:0.0025:30., default=24., show_value=true)
+	T0_slider = @bind T0_interact Slider(-60.:0.025:30., default=24., show_value=true)
 	md""" T₀ = $(T0_slider) °C"""
 end
 
@@ -906,24 +894,24 @@ begin
 	S
 	warming_mask = (1:size(Svec)[1]) .< size(Svec)./2
 	p = plot(xlims=(Smin, Smax_limited), ylims=(-55, 75), title="Earth's solar insolation bifurcation diagram")
-	# plot!([Model.S, Model.S], [-55, 75], color=:yellow, alpha=0.3, lw=8, label="Pre-industrial / present insolation")
-	# if extend_S
-	# 	plot!(p, xlims=(Smin, Smax))
-	# 	if show_cold
-	# 		plot!(Svec[warming_mask], Tvec[warming_mask], color=:blue,lw=3., alpha=0.5, label="cool branch")
-	# 	end
-	# 	if show_warm
-	# 		plot!(Svec[.!warming_mask], Tvec[.!warming_mask], color="red", lw=3., alpha=0.5, label="warm branch")
-	# 	end
-	# 	if show_unstable
-	# 		plot!(S_unstable, T_unstable, color=:darkgray, lw=3., alpha=0.4, ls=:dash, label="unstable branch")
-	# 	end
-	# end
-	# plot!(legend=:topleft)
-	# plot!(xlabel="solar insolation S [W/m²]", ylabel="Global temperature T [°C]")
-	# plot!([Model.S], [Model.T0], markershape=:circle, label="Our preindustrial climate", color=:orange, markersize=8)
-	# plot!([Model.S], [-38.3], markershape=:circle, label="Alternate preindustrial climate", color=:aqua, markersize=8)
-	# plot!([Sneo], [Tneo], markershape=:circle, label="neoproterozoic (700 Mya)", color=:lightblue, markersize=8)
+	plot!([Model.S, Model.S], [-55, 75], color=:yellow, alpha=0.3, lw=8, label="Pre-industrial / present insolation")
+	if extend_S
+	 	plot!(p, xlims=(Smin, Smax))
+	 	if show_cold
+	 		plot!(Svec[warming_mask], Tvec[warming_mask], color=:blue,lw=3., alpha=0.5, label="cool branch")
+	 	end
+	 	if show_warm
+	 		plot!(Svec[.!warming_mask], Tvec[.!warming_mask], color="red", lw=3., alpha=0.5, label="warm branch")
+	 	end
+		if show_unstable
+	 		plot!(S_unstable, T_unstable, color=:darkgray, lw=3., alpha=0.4, ls=:dash, label="unstable branch")
+	 	end
+	 end
+	 plot!(legend=:topleft)
+	 plot!(xlabel="solar insolation S [W/m²]", ylabel="Global temperature T [°C]")
+	 plot!([Model.S], [Model.T0], markershape=:circle, label="Our preindustrial climate", color=:orange, markersize=8)
+	 plot!([Model.S], [-38.3], markershape=:circle, label="Alternate preindustrial climate", color=:aqua, markersize=8)
+	 plot!([Sneo], [Tneo], markershape=:circle, label="neoproterozoic (700 Mya)", color=:lightblue, markersize=8)
 	plot_trajectory!(p, reverse(Straj), reverse(Ttraj), lw=9)
 	
 	plot!([Smin, Smax], [-60, -60], fillrange=[-10., -10.], fillalpha=0.3, c=:lightblue, label=nothing)
@@ -965,8 +953,9 @@ PlutoUI = "~0.7.38"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0"
+julia_version = "1.8.1"
 manifest_format = "2.0"
+project_hash = "c7985fc842213643bb231f366b02f441e1d9e753"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -982,6 +971,7 @@ version = "3.3.3"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[deps.ArnoldiMethod]]
 deps = ["LinearAlgebra", "Random", "StaticArrays"]
@@ -1116,6 +1106,7 @@ version = "3.43.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -1242,8 +1233,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[deps.Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[deps.DualNumbers]]
 deps = ["Calculus", "NaNMath", "SpecialFunctions"]
@@ -1291,6 +1283,9 @@ version = "0.1.15"
 git-tree-sha1 = "acebe244d53ee1b461970f8910c235b259e772ef"
 uuid = "9aa1b823-49e4-5ca5-8b0f-3971ec8bab6a"
 version = "0.3.2"
+
+[[deps.FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -1594,10 +1589,12 @@ version = "1.0.0"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1606,6 +1603,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1713,6 +1711,7 @@ version = "1.0.3"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[deps.Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1730,6 +1729,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[deps.MuladdMacro]]
 git-tree-sha1 = "c6190f9a7fc5d9d5915ab29f2134421b12d24a68"
@@ -1755,6 +1755,7 @@ version = "0.3.7"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[deps.NonlinearSolve]]
 deps = ["ArrayInterface", "FiniteDiff", "ForwardDiff", "IterativeSolvers", "LinearAlgebra", "RecursiveArrayTools", "RecursiveFactorization", "Reexport", "SciMLBase", "Setfield", "StaticArrays", "UnPack"]
@@ -1777,10 +1778,12 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1850,6 +1853,7 @@ version = "0.40.1+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -2007,6 +2011,7 @@ version = "0.3.0+0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[deps.SIMDDualNumbers]]
 deps = ["ForwardDiff", "IfElse", "SLEEFPirates", "VectorizationBase"]
@@ -2152,6 +2157,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[deps.SuiteSparse_jll]]
 deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
+version = "5.10.1+0"
 
 [[deps.Sundials]]
 deps = ["CEnum", "DataStructures", "DiffEqBase", "Libdl", "LinearAlgebra", "Logging", "Reexport", "SparseArrays", "Sundials_jll"]
@@ -2168,6 +2174,7 @@ version = "5.2.1+0"
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[deps.TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -2184,6 +2191,7 @@ version = "1.7.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -2411,6 +2419,7 @@ version = "1.4.0+3"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2433,6 +2442,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[deps.libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2455,10 +2465,12 @@ version = "1.3.7+1"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2486,7 +2498,7 @@ version = "0.9.1+5"
 # ╟─26e1879d-ab57-452a-a09f-49493e65b774
 # ╟─fd12468f-de16-47cc-8210-9266ca9548c2
 # ╟─30969341-9079-4732-bf55-d6bba2c2c16c
-# ╟─5bf3fe83-d096-4df1-8476-0a6500b01868
+# ╠═5bf3fe83-d096-4df1-8476-0a6500b01868
 # ╠═af7f36d9-adca-48b8-95bb-ac620e6f1b4f
 # ╠═790add0f-c83f-4824-92ae-53159ce58f64
 # ╟─21210cfa-0366-4019-86f7-158fdd5f21ad
@@ -2497,7 +2509,6 @@ version = "0.9.1+5"
 # ╟─991f14bb-fc4a-4505-a3be-5ced2fb148b6
 # ╟─61960e99-2932-4a8f-9e87-f64a7a043489
 # ╟─9acf9b8a-7fde-46c7-bf0c-c4dedc5a064b
-# ╟─9bc33f22-c065-4c1d-b06f-78c70415a111
 # ╠═6f61180d-6900-48fa-998d-36110e79d2dc
 # ╠═a09a0064-c6ab-4912-bc9f-96ab72b8bbca
 # ╟─5027e1f8-8c50-4538-949e-6c95c550016e
@@ -2515,7 +2526,7 @@ version = "0.9.1+5"
 # ╟─066743eb-c890-40b9-9f6b-9f79b7ebcbd2
 # ╟─70ec6ae9-601f-4862-96cb-f251d4b5a7fd
 # ╟─2bafd1a4-32a3-4787-807f-0a5132d66c28
-# ╠═40b5e447-0cfb-4f35-8f95-6aa29793e5ad
+# ╟─40b5e447-0cfb-4f35-8f95-6aa29793e5ad
 # ╟─fca6c4ec-4d0c-4f97-b966-ce3a81a18710
 # ╠═b1fee17b-6522-4cf0-a614-5ff8aa8f8614
 # ╟─cfde8137-cfcd-46de-9c26-8abb64b6b3a9
@@ -2523,25 +2534,25 @@ version = "0.9.1+5"
 # ╠═e9942719-93cc-4203-8d37-8f91539104b1
 # ╟─0c1e3051-c491-4de7-a149-ce81c53f5841
 # ╟─d0d43dc3-4cda-4602-90c6-2d14a1e63871
-# ╟─48431fc9-413f-4f72-8c6f-f48b42c29475
-# ╟─c719ff5f-421d-4d4d-87b7-34879ab188c5
-# ╠═0b6bfab9-96e9-4d7a-a486-4582d7303244
+# ╠═48431fc9-413f-4f72-8c6f-f48b42c29475
+# ╠═c719ff5f-421d-4d4d-87b7-34879ab188c5
+# ╟─0b6bfab9-96e9-4d7a-a486-4582d7303244
 # ╟─9b6edae8-fbf0-4979-9536-c0f782ba70a7
-# ╠═81d823a6-5c92-496a-96f1-a0f4762f1f05
+# ╟─81d823a6-5c92-496a-96f1-a0f4762f1f05
 # ╟─28924aef-9157-4490-afa5-7f232a5101f0
 # ╟─5eb888e1-ba95-4aa1-97c0-784dc9d9e6d5
 # ╠═18922c20-62dc-4524-8300-bbab4db828a9
-# ╠═22328073-bb46-4ec2-9fdf-17c0daff5741
+# ╟─22328073-bb46-4ec2-9fdf-17c0daff5741
 # ╟─9c4ac33a-ebbd-47db-9057-91624b0a2497
 # ╟─2798028c-d971-45e4-9484-bdec7e8dc048
 # ╟─5fc03f0f-ae12-476f-93f8-6285ee7f5fc9
 # ╟─eb0307f1-c828-41f9-bc49-2aedd5b588e1
 # ╠═ada47602-2cf6-4ef5-b1ba-0b1c6f81ad91
-# ╟─5ebe385f-3542-4674-b419-fb54519aa945
+# ╠═5ebe385f-3542-4674-b419-fb54519aa945
 # ╟─72e822ef-0256-4612-8b6d-654ba6f6a83f
 # ╟─10815b22-b920-4cb7-a078-4d5ef457ebf2
 # ╟─984f0489-7430-43b9-8926-9d7c32e7da63
-# ╟─bf0dd94d-e861-478a-9bb0-d34d17405fcc
+# ╠═bf0dd94d-e861-478a-9bb0-d34d17405fcc
 # ╟─81088439-312a-4042-bcee-c021e5e3f6b7
 # ╟─9d79d1ed-a538-4eda-bbe2-4b3858cc4e01
 # ╟─5b574c5a-ce4b-4804-aa6c-58e0f7459520

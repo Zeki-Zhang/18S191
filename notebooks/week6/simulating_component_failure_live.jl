@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -968,7 +968,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[EarCut_jll]]
@@ -994,6 +994,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1855,7 +1858,7 @@ version = "0.9.1+5"
 # ╠═f3c85814-0846-11eb-1266-63f31f351a51
 # ╠═01dbe272-0847-11eb-1331-4360a575ff14
 # ╟─be8e4ac2-08dd-11eb-2f72-a9da5a750d32
-# ╟─8bc52d58-0848-11eb-3487-ef0d06061042
+# ╠═8bc52d58-0848-11eb-3487-ef0d06061042
 # ╟─caa3faa2-08e5-11eb-33fe-cbbc00cfd459
 # ╟─2174aeba-08e6-11eb-09a9-2d6a882a2604
 # ╟─f5756dd6-0847-11eb-0870-fd06ad10b6c7

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -100,6 +100,9 @@ Instead, let's define an _alphabet_, and only use those letters to sample from. 
 # ╔═╡ 4efc051e-f92e-11ea-080e-bde6b8f9295a
 alphabet = ['a':'z' ; ' ']   # includes the space character
 
+# ╔═╡ ff3dc2cc-32de-4b88-9a5b-7b45a41d495f
+typeof(alphabet)
+
 # ╔═╡ 38d1ace8-f991-11ea-0b5f-ed7bd08edde5
 md"""
 Let's sample random characters from our alphabet:
@@ -158,7 +161,7 @@ md"👉 Use `filter` to extract just the characters from our alphabet out of `me
 messy_sentence_1 = "#wow 2020 ¥500 (blingbling!)"
 
 # ╔═╡ 75694166-f998-11ea-0428-c96e1113e2a0
-cleaned_sentence_1 = missing
+cleaned_sentence_1 = filter(isinalphabet, messy_sentence_1)
 
 # ╔═╡ 05f0182c-f999-11ea-0a52-3d46c65a049e
 md"""
@@ -177,7 +180,7 @@ md"👉 Use the function `lowercase` to convert `messy_sentence_2` into a lower 
 messy_sentence_2 = "Awesome! 😍"
 
 # ╔═╡ d3a4820e-f998-11ea-2a5c-1f37e2a6dd0a
-cleaned_sentence_2 = missing
+cleaned_sentence_2 = filter(isinalphabet, lowercase(messy_sentence_2))
 
 # ╔═╡ aad659b8-f998-11ea-153e-3dae9514bfeb
 md"""
@@ -212,6 +215,9 @@ Los bosques pueden hallarse en todas las regiones capaces de mantener el crecimi
 """ |> unaccent,
 )
 
+# ╔═╡ 2683fbcd-ce25-49bc-8e2e-a7fc918f888d
+typeof(samples)
+
 # ╔═╡ a56724b6-f9a0-11ea-18f2-991e0382eccf
 unaccent(french_word)
 
@@ -227,8 +233,9 @@ $(html"<br>")
 
 # ╔═╡ 4affa858-f92e-11ea-3ece-258897c37e51
 function clean(text)
+	cleaned_text = filter(isinalphabet, lowercase(unaccent(text)))
 	
-	return missing
+	return cleaned_text
 end
 
 # ╔═╡ e00d521a-f992-11ea-11e0-e9da8255b23b
@@ -244,8 +251,11 @@ function letter_frequencies(txt)
 	f ./ sum(f)
 end
 
+# ╔═╡ 0ca38bdd-60e5-4be2-af98-71b7eec453f9
+string.(alphabet)
+
 # ╔═╡ 11e9a0e2-bc3d-4130-9a73-7c2003595caa
-alphabet
+alphabet[1]
 
 # ╔═╡ 6a64ab12-f960-11ea-0d92-5b88943cdb1a
 sample_freqs = letter_frequencies(first_sample)
@@ -274,7 +284,7 @@ $(html"<br>")
 """
 
 # ╔═╡ 92bf9fd2-f9a5-11ea-25c7-5966e44db6c6
-unused_letters = ['a', 'b', 'c'] # replace with your answer
+unused_letters = ['j', 'q', 'z'] # replace with your answer
 
 # ╔═╡ 01215e9a-f9a9-11ea-363b-67392741c8d4
 md"""
@@ -346,13 +356,13 @@ end
 md"""👉 What is the frequency of the combination `"th"`?"""
 
 # ╔═╡ 1b4c0c28-f9ab-11ea-03a6-69f69f7f90ed
-th_frequency = missing
+th_frequency = sample_freq_matrix[index_of_letter('t'), index_of_letter('h')]
 
 # ╔═╡ 1f94e0a2-f9ab-11ea-1347-7dd906ebb09d
 md"""👉 What about `"ht"`?"""
 
 # ╔═╡ 41b2df7c-f931-11ea-112e-ede3b16f357a
-ht_frequency = missing
+ht_frequency = sample_freq_matrix[index_of_letter('h'), index_of_letter('t')]
 
 # ╔═╡ 1dd1e2f4-f930-11ea-312c-5ff9e109c7f6
 md"""
@@ -360,7 +370,10 @@ md"""
 """
 
 # ╔═╡ 65c92cac-f930-11ea-20b1-6b8f45b3f262
-double_letters = ['a', 'b', 'c'] # replace with your answer
+begin
+	indexes = findall(x -> x > 0, [sample_freq_matrix[i,i]; for i in 1:27])
+	double_letters = [alphabet[i] for i in indexes]  # replace with your answer
+end
 
 # ╔═╡ 4582ebf4-f930-11ea-03b2-bf4da1a8f8df
 md"""
@@ -370,7 +383,11 @@ _You are free to do this partially by hand, partially using code, whatever is ea
 """
 
 # ╔═╡ 7898b76a-f930-11ea-2b7e-8126ec2b8ffd
-most_likely_to_follow_w = 'x' # replace with your answer
+begin
+	index_w = index_of_letter('w')
+	most_likely_to_follow_w_index = findmax(sample_freq_matrix[index_w, :])[2]
+	most_likely_to_follow_w = alphabet[most_likely_to_follow_w_index] # replace with your answer
+end
 
 # ╔═╡ 458cd100-f930-11ea-24b8-41a49f6596a0
 md"""
@@ -380,7 +397,11 @@ _You are free to do this partially by hand, partially using code, whatever is ea
 """
 
 # ╔═╡ bc401bee-f931-11ea-09cc-c5efe2f11194
-most_likely_to_precede_w = 'x' # replace with your answer
+begin
+#	index_w = index_of_letter('w')
+	most_likely_to_precede_w_index = findmax(sample_freq_matrix[:, index_w])[2]
+	most_likely_to_precede_w = alphabet[most_likely_to_precede_w_index] # replace with your answer
+end
 
 # ╔═╡ 45c20988-f930-11ea-1d12-b782d2c01c11
 md"""
@@ -388,16 +409,13 @@ md"""
 """
 
 # ╔═╡ 58428158-84ac-44e4-9b38-b991728cd98a
-row_sums = missing
+row_sums = sum(sample_freq_matrix, dims=2)
 
 # ╔═╡ 4a0314a6-7dc0-4ee9-842b-3f9bd4d61fb1
-col_sums = missing
+col_sums = sum(sample_freq_matrix, dims=1)
 
 # ╔═╡ cc62929e-f9af-11ea-06b9-439ac08dcb52
-row_col_answer = md"""
-
-Blablabla
-"""
+row_col_answer = sum(row_sums)
 
 # ╔═╡ 2f8dedfc-fb98-11ea-23d7-2159bdb6a299
 md"""
@@ -481,8 +499,8 @@ The only question left is: How do we compare two matrices? When two matrices are
 
 # ╔═╡ 13c89272-f934-11ea-07fe-91b5d56dedf8
 function matrix_distance(A, B)
-
-	return missing # do something with A .- B
+	
+	return reduce(+, abs.(A.-B)) # do something with A .- B
 end
 
 # ╔═╡ 7d60f056-f931-11ea-39ae-5fa18a955a77
@@ -521,7 +539,10 @@ emma = let
 	stop_index = findlast(last_words, raw_text)[end]
 	
 	raw_text[start_index:stop_index]
-end;
+end
+
+# ╔═╡ e119aa80-1403-4f7c-8917-bcfe31c0894a
+emma
 
 # ╔═╡ cc42de82-fb5a-11ea-3614-25ef961729ab
 function splitwords(text)
@@ -592,8 +613,11 @@ ngrams([1, 2, 3, 42], 2) == bigrams([1, 2, 3, 42])
 
 # ╔═╡ 7be98e04-fb6b-11ea-111d-51c48f39a4e9
 function ngrams(words, n)
+	starting_positions = 1:length(words)-n+1
 	
-	return missing
+	map(starting_positions) do i
+		words[i:i+n-1]
+	end
 end
 
 # ╔═╡ 052f822c-fb7b-11ea-382f-af4d6c2b4fdb
@@ -636,7 +660,10 @@ Take a close look at the next example. Note that you can click on the output to 
 healthy = Dict("fruits" => ["🍎", "🍊"], "vegetables" => ["🌽", "🎃", "🍕"])
 
 # ╔═╡ c83b1770-fb82-11ea-20a6-3d3a09606c62
-healthy["fruits"]
+healthy["fruits"] = ["a"]
+
+# ╔═╡ 710974df-b688-4e24-9b1c-088c6e55c9d8
+healthy
 
 # ╔═╡ 52970ac4-fb82-11ea-3040-8bd0590348d2
 md"""
@@ -664,7 +691,13 @@ Dict(
 # ╔═╡ 8ce3b312-fb82-11ea-200c-8d5b12f03eea
 function word_counts(words::Vector)
 	counts = Dict()
-	
+	for i in words
+		if haskey(counts, i)
+			counts[i] += 1
+		else
+			counts[i] = 1
+		end
+	end
 	# your code here
 	
 	return counts
@@ -1317,8 +1350,11 @@ deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1533,15 +1569,17 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─59f2c600-2b64-4562-9426-2cfed9a864e4
 # ╟─f457ad44-f990-11ea-0e2d-2bb7627716a8
 # ╠═4efc051e-f92e-11ea-080e-bde6b8f9295a
+# ╠═ff3dc2cc-32de-4b88-9a5b-7b45a41d495f
 # ╟─38d1ace8-f991-11ea-0b5f-ed7bd08edde5
 # ╠═ddf272c8-f990-11ea-2135-7bf1a6dca0b7
 # ╟─3cc688d2-f996-11ea-2a6f-0b4c7a5b74c2
 # ╟─d67034d0-f92d-11ea-31c2-f7a38ebb412f
 # ╟─7e09011c-71b5-4f05-ae4a-025d48daca1d
+# ╠═2683fbcd-ce25-49bc-8e2e-a7fc918f888d
 # ╟─a094e2ac-f92d-11ea-141a-3566552dd839
 # ╠═27c9a7f4-f996-11ea-1e46-19e3fc840ad9
 # ╟─f2a4edfa-f996-11ea-1a24-1ba78fd92233
-# ╟─5c74a052-f92e-11ea-2c5b-0f1a3a14e313
+# ╠═5c74a052-f92e-11ea-2c5b-0f1a3a14e313
 # ╠═dcc4156c-f997-11ea-3e6f-057cd080d9db
 # ╟─129fbcfe-f998-11ea-1c96-0fd3ccd2dcf8
 # ╠═3a5ee698-f998-11ea-0452-19b70ed11a1d
@@ -1563,11 +1601,12 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─ddfb1e1c-f9a1-11ea-3625-f1170272e96a
 # ╟─eaa8c79e-f9a2-11ea-323f-8bb2bd36e11c
 # ╠═2680b506-f9a3-11ea-0849-3989de27dd9f
-# ╟─571d28d6-f960-11ea-1b2e-d5977ecbbb11
+# ╠═571d28d6-f960-11ea-1b2e-d5977ecbbb11
+# ╠═0ca38bdd-60e5-4be2-af98-71b7eec453f9
 # ╠═11e9a0e2-bc3d-4130-9a73-7c2003595caa
 # ╠═6a64ab12-f960-11ea-0d92-5b88943cdb1a
 # ╟─603741c2-f9a4-11ea-37ce-1b36ecc83f45
-# ╟─b3de6260-f9a4-11ea-1bae-9153a92c3fe5
+# ╠═b3de6260-f9a4-11ea-1bae-9153a92c3fe5
 # ╠═a6c36bd6-f9a4-11ea-1aba-f75cecc90320
 # ╟─6d3f9dae-f9a5-11ea-3228-d147435e266d
 # ╠═92bf9fd2-f9a5-11ea-25c7-5966e44db6c6
@@ -1576,11 +1615,11 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─dcffd7d2-f9a6-11ea-2230-b1afaecfdd54
 # ╟─b3dad856-f9a7-11ea-1552-f7435f1cb605
 # ╟─01215e9a-f9a9-11ea-363b-67392741c8d4
-# ╟─be55507c-f9a7-11ea-189c-4ffe8377212e
+# ╠═be55507c-f9a7-11ea-189c-4ffe8377212e
 # ╟─8ae13cf0-f9a8-11ea-3919-a735c4ed9e7f
 # ╟─343d63c2-fb58-11ea-0cce-efe1afe070c2
-# ╟─b5b8dd18-f938-11ea-157b-53b145357fd1
-# ╟─0e872a6c-f937-11ea-125e-37958713a495
+# ╠═b5b8dd18-f938-11ea-157b-53b145357fd1
+# ╠═0e872a6c-f937-11ea-125e-37958713a495
 # ╟─77623f3e-f9a9-11ea-2f46-ff07bd27cd5f
 # ╠═fbb7c04e-f92d-11ea-0b81-0be20da242c8
 # ╠═80118bf8-f931-11ea-34f3-b7828113ffd8
@@ -1599,7 +1638,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─489fe282-f931-11ea-3dcb-35d4f2ac8b40
 # ╟─1dd1e2f4-f930-11ea-312c-5ff9e109c7f6
 # ╠═65c92cac-f930-11ea-20b1-6b8f45b3f262
-# ╠═671525cc-f930-11ea-0e71-df9d4aae1c05
+# ╟─671525cc-f930-11ea-0e71-df9d4aae1c05
 # ╟─7711ecc5-9132-4223-8ed4-4d0417b5d5c1
 # ╟─4582ebf4-f930-11ea-03b2-bf4da1a8f8df
 # ╠═7898b76a-f930-11ea-2b7e-8126ec2b8ffd
@@ -1611,32 +1650,33 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═58428158-84ac-44e4-9b38-b991728cd98a
 # ╠═4a0314a6-7dc0-4ee9-842b-3f9bd4d61fb1
 # ╠═cc62929e-f9af-11ea-06b9-439ac08dcb52
-# ╟─d3d7bd9c-f9af-11ea-1570-75856615eb5d
+# ╠═d3d7bd9c-f9af-11ea-1570-75856615eb5d
 # ╟─2f8dedfc-fb98-11ea-23d7-2159bdb6a299
 # ╟─b7446f34-f9b1-11ea-0f39-a3c17ba740e5
 # ╟─4f97b572-f9b0-11ea-0a99-87af0797bf28
-# ╟─46c905d8-f9b0-11ea-36ed-0515e8ed2621
+# ╠═46c905d8-f9b0-11ea-36ed-0515e8ed2621
 # ╟─4e8d327e-f9b0-11ea-3f16-c178d96d07d9
-# ╟─489b03d4-f9b0-11ea-1de0-11d4fe4e7c69
+# ╠═489b03d4-f9b0-11ea-1de0-11d4fe4e7c69
 # ╟─d83f8bbc-f9af-11ea-2392-c90e28e96c65
-# ╟─fd202410-f936-11ea-1ad6-b3629556b3e0
+# ╠═fd202410-f936-11ea-1ad6-b3629556b3e0
 # ╟─0e465160-f937-11ea-0ebb-b7e02d71e8a8
 # ╟─6718d26c-f9b0-11ea-1f5a-0f22f7ddffe9
 # ╟─141af892-f933-11ea-1e5f-154167642809
 # ╟─7eed9dde-f931-11ea-38b0-db6bfcc1b558
-# ╟─7e3282e2-f931-11ea-272f-d90779264456
+# ╠═7e3282e2-f931-11ea-272f-d90779264456
 # ╟─7d1439e6-f931-11ea-2dab-41c66a779262
 # ╠═7df55e6c-f931-11ea-33b8-fdc3be0b6cfa
 # ╟─292e0384-fb57-11ea-0238-0fbe416fc976
 # ╠═7dabee08-f931-11ea-0cb2-c7d5afd21551
 # ╟─3736a094-fb57-11ea-1d39-e551aae62b1d
 # ╠═13c89272-f934-11ea-07fe-91b5d56dedf8
-# ╟─7d60f056-f931-11ea-39ae-5fa18a955a77
+# ╠═7d60f056-f931-11ea-39ae-5fa18a955a77
 # ╟─b09f5512-fb58-11ea-2527-31bea4cee823
 # ╟─8c7606f0-fb93-11ea-0c9c-45364892cbb8
 # ╟─82e0df62-fb54-11ea-3fff-b16c87a7d45b
 # ╠═b7601048-fb57-11ea-0754-97dc4e0623a1
-# ╟─cc42de82-fb5a-11ea-3614-25ef961729ab
+# ╠═e119aa80-1403-4f7c-8917-bcfe31c0894a
+# ╠═cc42de82-fb5a-11ea-3614-25ef961729ab
 # ╠═d66fe2b2-fb5a-11ea-280f-cfb12b8296ac
 # ╠═4ca8e04a-fb75-11ea-08cc-2fdef5b31944
 # ╟─6f613cd2-fb5b-11ea-1669-cbd355677649
@@ -1653,6 +1693,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─47836744-fb7e-11ea-2305-3fa5819dc154
 # ╠═df4fc31c-fb81-11ea-37b3-db282b36f5ef
 # ╠═c83b1770-fb82-11ea-20a6-3d3a09606c62
+# ╠═710974df-b688-4e24-9b1c-088c6e55c9d8
 # ╟─52970ac4-fb82-11ea-3040-8bd0590348d2
 # ╠═8ce3b312-fb82-11ea-200c-8d5b12f03eea
 # ╠═a2214e50-fb83-11ea-3580-210f12d44182
@@ -1680,7 +1721,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─7f341c4e-fb54-11ea-1919-d5421d7a2c75
 # ╟─cc07f576-fbf3-11ea-2c6f-0be63b9356fc
 # ╟─6b4d6584-f3be-11ea-131d-e5bdefcc791b
-# ╟─54b1e236-fb53-11ea-3769-b382ef8b25d6
+# ╠═54b1e236-fb53-11ea-3769-b382ef8b25d6
 # ╟─b7803a28-fb96-11ea-3e30-d98eb322d19a
 # ╟─ddef9c94-fb96-11ea-1f17-f173a4ff4d89
 # ╟─ffc17f40-f380-11ea-30ee-0fe8563c0eb1

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -131,6 +131,9 @@ md"""
 # ╔═╡ 9d2e3861-ca36-406e-952d-831ca3947e44
 data = DataFrame(°F=x,°C=y) # Label = data
 
+# ╔═╡ 034cdb0c-9993-4344-9f14-9dced188b7f4
+data.°C
+
 # ╔═╡ e73854ed-3581-41c4-ada5-e48242033759
 md"""
 ### Data Frame with a matrix
@@ -173,6 +176,9 @@ md"""
 
 # ╔═╡ aff6a616-6d8b-4584-a6f2-195decef7774
 data_again = CSV.read("testCSVwrite.csv", DataFrame ) 
+
+# ╔═╡ 7593b33e-e359-49ba-a981-e150ce8acada
+data_again[:, 1]
 
 # ╔═╡ 338da13a-3c26-4366-a669-ac3e24f31577
 data_again[:,"°F" ] # or data_again[:,1]
@@ -324,6 +330,9 @@ md"""
 ## Julia: underscore as a digits separator
 """
 
+# ╔═╡ 01aa1c54-dce9-4e29-b17e-b853767aca5c
+1_00
+
 # ╔═╡ c7455f7a-9c72-42f5-8238-1799cad96f6c
 md"""
 ## Simulated intercepts ($howmany simulations)
@@ -422,7 +431,7 @@ md"""
 # ╔═╡ ce89b805-39a2-49e6-8781-c557aa73ed27
 begin	
 	histogram( last.(s) ./ (σ^2/(n-2)) , alpha=.6, bins=100, norm=true,legend=false)
-	vline!([1],color=:white)
+	vline!([1],color=:white, lw=3)
 	title!("residual")
 	vline!([n-2],color=:white, lw=4)
 	# xlims!(0,20)
@@ -503,7 +512,7 @@ md"""
 
 # ╔═╡ ccfcb4d9-5a88-48fb-9568-1147a74f6eec
 md"""
-The t column, is simply the Coeff column divided by the Std. error column which we will use in a hypothesis test in the upcoming column.
+The t column, is simply the Coeff column divided by the Std. error column which we will use in a hypothesis test in the upcoming section.
 """
 
 # ╔═╡ 13858c0a-3e7a-4742-a821-97dd9a45109d
@@ -531,7 +540,7 @@ begin
 	histogram([rand_t(k) for i=1:100000], norm=true, bins=500, label=false)
 	plot!( x-> pdf(TDist(k),x) , lw=4 , color=:red, label="t dist" )
 	plot!( x->pdf(Normal(),x), color=:green, lw=2, label="normal dist")
-	xlims!(-3, 3)
+	xlims!(-k, k)
 	ylims!(0, .4)
 end
 
@@ -565,7 +574,7 @@ How many degrees of freedom are in a "demeaned" vector of normals?
 
 # ╔═╡ cdc4b25d-d05f-40c8-9c79-265876f01523
    
-mean([ (v = randn(17);v.-=mean(v);sum(v.^2)) for i=1:1_000_000])
+mean([ (v = randn(15);v.-=mean(v);sum(v.^2)) for i=1:1_000_000])
 
 # ╔═╡ 967c5e3e-ab4c-45de-953c-aff6d16229af
 md"""
@@ -612,6 +621,7 @@ version = "3.3.3"
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -688,6 +698,7 @@ version = "3.43.0"
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[Contour]]
 deps = ["StaticArrays"]
@@ -753,8 +764,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -785,6 +797,9 @@ deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
 git-tree-sha1 = "129b104185df66e408edd6625d480b7f9e9823a0"
 uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
 version = "0.9.18"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -1000,10 +1015,12 @@ version = "0.15.15"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1012,6 +1029,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1096,6 +1114,7 @@ version = "1.0.3"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1113,6 +1132,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[NaNMath]]
 git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
@@ -1121,6 +1141,7 @@ version = "1.0.0"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1131,10 +1152,12 @@ version = "1.3.5+1"
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1186,6 +1209,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1295,6 +1319,7 @@ version = "0.3.0+0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -1392,6 +1417,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1408,6 +1434,7 @@ version = "1.7.0"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1612,6 +1639,7 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1628,6 +1656,7 @@ version = "0.15.1+0"
 [[libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1650,10 +1679,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1689,6 +1720,7 @@ version = "0.9.1+5"
 # ╟─ca21122a-2522-482a-b7ef-bd73e96cb5a9
 # ╟─41e05b1e-8b5e-45e3-91bb-01355ade9f3d
 # ╠═9d2e3861-ca36-406e-952d-831ca3947e44
+# ╠═034cdb0c-9993-4344-9f14-9dced188b7f4
 # ╟─e73854ed-3581-41c4-ada5-e48242033759
 # ╠═9873d944-b611-46f9-82a7-0cf714a3078c
 # ╠═2be44753-afee-4125-b6bc-8866d2293dc2
@@ -1698,10 +1730,11 @@ version = "0.9.1+5"
 # ╠═2e42986c-2de3-49e6-9c29-a7313c0b1da8
 # ╟─22758dd6-9d04-4616-ba99-1430f2dedf9a
 # ╠═aff6a616-6d8b-4584-a6f2-195decef7774
+# ╠═7593b33e-e359-49ba-a981-e150ce8acada
 # ╠═338da13a-3c26-4366-a669-ac3e24f31577
 # ╠═5a742546-1e4d-4aee-bed1-cb10c543e439
 # ╟─6a9c8c9a-fac7-42f7-976d-3168132cae48
-# ╟─3c038b68-8676-4877-9720-38da7c4e0e0e
+# ╠═3c038b68-8676-4877-9720-38da7c4e0e0e
 # ╟─5a877e40-a101-4f7d-b2a1-ef4cfe5d8807
 # ╟─83c28c76-2eab-49f9-9999-05df85054520
 # ╟─ba671804-dc6d-415c-89de-9cf6294907b3
@@ -1723,6 +1756,7 @@ version = "0.9.1+5"
 # ╠═e4acd97b-22f7-4812-9898-1a485887a5f2
 # ╠═4e413b40-81c4-4160-9d01-046c2d179a06
 # ╟─7b94db0d-f46b-4621-9413-1dc787ae9a39
+# ╠═01aa1c54-dce9-4e29-b17e-b853767aca5c
 # ╠═51a28b67-ad64-4cf2-a0e6-a78fb101eb15
 # ╠═d451af49-3139-4329-a885-a210b1760f74
 # ╟─c7455f7a-9c72-42f5-8238-1799cad96f6c

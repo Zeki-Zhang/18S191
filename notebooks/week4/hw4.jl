@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -99,6 +99,9 @@ function fib(n)
 	return fib(n-1) + fib(n-2)
 end
 
+# ╔═╡ d6ac445d-e7a9-4f57-bdc4-af0f8722589d
+[findmin.(1:5)[i][1] for i in 1:5 ]
+
 # ╔═╡ 1add9afd-5ff5-451d-ad81-57b0e929dfe8
 grant_example
 
@@ -110,6 +113,9 @@ grant_example_optimal_seam = [4, 3, 2, 2, 3, 3]
 	sum(grant_example[i, grant_example_optimal_seam[i]] for i in 1:6),
 	grant_example_optimal_seam[2]
 )
+
+# ╔═╡ 7fe85c74-6435-473b-a32b-62512c113c2e
+
 
 # ╔═╡ cbf29020-f3ba-11ea-2cb0-b92836f3d04b
 begin
@@ -167,7 +173,7 @@ md"""
 
  $(@bind image_url Select(all_image_urls))
 
-Maximum image size: $(@bind max_height_str Select(string.([50,100,200,500]))) pixels. _(Using a large image might lead to long runtimes in the later exercises.)_
+Maximum image size: $(@bind max_height_str Select(string.([50,100,200,500,800]))) pixels. _(Using a large image might lead to long runtimes in the later exercises.)_
 """
 
 # ╔═╡ 0d144802-f319-11ea-0028-cd97a776a3d0
@@ -300,9 +306,15 @@ md"""
 
 # ╔═╡ abf20aa0-f31b-11ea-2548-9bea4fab4c37
 function greedy_seam(energies, starting_pixel::Int)
-	m, n = size(energies)
-	# you can delete the body of this function - it's just a placeholder.
-	random_seam(size(energies)..., starting_pixel)
+	rows, cols = size(energies)
+	seam = zeros(Int, rows)
+	seam[1] = starting_pixel
+	for i in 2:rows
+		left = maximum([1,seam[i-1]-1])
+		right = minimum([cols,seam[i-1]+1])
+		seam[i] = findmin(energies[i, left:right])[2] +left -1
+	end
+	return seam
 end
 
 # ╔═╡ 5430d772-f397-11ea-2ed8-03ee06d02a22
@@ -371,6 +383,14 @@ Return these two values in a tuple.
 ## returns lowest possible sum energy at pixel (i, j), and the column to jump to in row i+1.
 function least_energy(energies, i, j)
 	m, n = size(energies)
+	if i == m
+		return (energies[end,j], j)
+	end
+	left = maximum([1, j-1])
+	right = minimum([n, j+1])
+	least_energy_1, next_col = findmin([least_energy(energies, i+1, k)[1] for k in left:right])
+	next_col += left - 1
+	return (least_energy_1 + energies[i,j], next_col)
 	
 	## base case
 	# if i == something
@@ -421,7 +441,12 @@ This will give you the method used in the lecture to perform [exhaustive search 
 function recursive_seam(energies, starting_pixel)
 	m, n = size(energies)
 	# Replace the following line with your code.
-	[rand(1:starting_pixel) for i=1:m]
+	seam = zeros(Int, m)
+	seam[1] = starting_pixel
+	for i in 2:m
+		seam[i] = least_energy(energies, i-1, seam[i-1])[2]
+	end
+	return seam
 end
 
 # ╔═╡ f92ac3e4-fa70-4bcf-bc50-a36792a8baaa
@@ -478,7 +503,17 @@ You are expected to read and understand the [documentation on dictionaries](http
 # ╔═╡ b1d09bc8-f320-11ea-26bb-0101c9a204e2
 function memoized_least_energy(energies, i, j, memory::Dict)
 	m, n = size(energies)
-	
+	if haskey(memory, (i,j))
+		return memory[(i,j)][2]
+	elseif i == m
+		return energies[end,j]
+	end
+	left = maximum([1, j-1])
+	right = minimum([n, j+1])
+	least_energy_1, next_col = findmin([memoized_least_energy(energies, i+1, k, memory)[1] for k in left:right])
+	next_col += left - 1
+	memory[(i,j)] = (least_energy_1 + energies[i,j], next_col)
+	return memory[(i,j)]
 	# you should start by copying the code from 
 	# your (not-memoized) least_energies function.
 	
@@ -486,6 +521,9 @@ end
 
 # ╔═╡ 1947f304-fa2c-4019-8584-01ef44ef2859
 memoized_least_energy_test = memoized_least_energy(grant_example, 1, 4, Dict())
+
+# ╔═╡ 0c7f8938-854d-4a9a-8415-e141d8420a1a
+grant_example
 
 # ╔═╡ 8992172e-c5b6-463e-a06e-5fe42fb9b16b
 md"""
@@ -503,9 +541,14 @@ function memoized_recursive_seam(energies, starting_pixel)
 	# the value type (Tuple{Float64,Int}). 
 	# If you need to memoize something else, you can just use Dict() without types.
 	memory = Dict{Tuple{Int,Int},Tuple{Float64,Int}}()
-	
+	memory = Dict()
 	m, n = size(energies)
-	
+	seam = zeros(Int, m)
+	seam[1] = starting_pixel
+	for i in 2:m
+		seam[i] = memoized_least_energy(energies, i-1, seam[i-1], Dict())[2]
+	end
+	return seam
 	# Replace the following line with your code.
 	
 	# you should start by copying the code from 
@@ -574,10 +617,13 @@ Now it's easy to see that the above algorithm is equivalent to one that populate
 function least_energy_matrix(energies)
 	result = copy(energies)
 	m, n = size(energies)
-	
-	# your code here
-	
-	
+	for i in m-1:-1:1
+		result[i,1] = minimum(result[i+1,1:2]) + energies[i,1]
+		result[i,end] = minimum(result[i+1,end-1:end]) + energies[i,end]
+		for j in 2:n-1
+			result[i,j] = minimum(result[i+1,j-1:j+1]) + energies[i,j]
+		end
+	end
 	return result
 end
 
@@ -606,10 +652,15 @@ md"""
 function seam_from_precomputed_least_energy(energies, starting_pixel::Int)
 	least_energies = least_energy_matrix(energies)
 	m, n = size(least_energies)
-	
+	seam = zeros(Int, m)
+	seam[1] = starting_pixel
 	# Replace the following line with your code.
-	[starting_pixel for i=1:m]
-	
+	for i in 2:m
+		left = maximum([1,seam[i-1]-1])
+		right = minimum([n,seam[i-1]+1])
+		seam[i] = findmin(least_energies[i,left:right])[2] + left -1
+	end
+	return seam
 end
 
 # ╔═╡ 51df0c98-f3c5-11ea-25b8-af41dc182bac
@@ -820,6 +871,7 @@ let
 	else
 		keep_working(md"Careful! Your `memoized_recursive_seam` is still making too many memory accesses, you may not want to run the visualization below.")
 	end
+	aresult
 end
 
 # ╔═╡ 00026442-f381-11ea-2b41-bde1fff66011
@@ -1092,7 +1144,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[DualNumbers]]
@@ -1124,6 +1176,9 @@ deps = ["Pkg", "Requires", "UUIDs"]
 git-tree-sha1 = "9267e5f50b0e12fdfd5a2455534345c4cf2c7f7a"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.14.0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1804,10 +1859,10 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─938185ec-f384-11ea-21dc-b56b7469f798
 # ╠═a4937996-f314-11ea-2ff9-615c888afaa8
 # ╟─0f271e1d-ae16-4eeb-a8a8-37951c70ba31
-# ╟─6dabe5e2-c851-4a2e-8b07-aded451d8058
+# ╠═6dabe5e2-c851-4a2e-8b07-aded451d8058
 # ╠═ab276048-f34b-42dd-b6bf-0b83c6d99e6a
 # ╠═0d144802-f319-11ea-0028-cd97a776a3d0
-# ╟─a5271c38-ba45-416b-94a4-ba608c25b897
+# ╠═a5271c38-ba45-416b-94a4-ba608c25b897
 # ╟─365349c7-458b-4a6d-b067-5112cb3d091f
 # ╟─b49e8cc8-f381-11ea-1056-91668ac6ae4e
 # ╠═90a22cc6-f327-11ea-1484-7fda90283797
@@ -1855,6 +1910,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─32e9a944-f3b6-11ea-0e82-1dff6c2eef8d
 # ╟─9101d5a0-f371-11ea-1c04-f3f43b96ca4a
 # ╠═8ec27ef8-f320-11ea-2573-c97b7b908cb7
+# ╠═d6ac445d-e7a9-4f57-bdc4-af0f8722589d
 # ╠═ad524df7-29e2-4f0d-ad72-8ecdd57e4f02
 # ╠═1add9afd-5ff5-451d-ad81-57b0e929dfe8
 # ╟─414dd91b-8d05-44f0-8bbd-b15981ce1210
@@ -1866,6 +1922,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─a7f3d9f8-f3bb-11ea-0c1a-55bbb8408f09
 # ╠═fa8e2772-f3b6-11ea-30f7-699717693164
 # ╟─18e0fd8a-f3bc-11ea-0713-fbf74d5fa41a
+# ╟─7fe85c74-6435-473b-a32b-62512c113c2e
 # ╟─cbf29020-f3ba-11ea-2cb0-b92836f3d04b
 # ╟─8bc930f0-f372-11ea-06cb-79ced2834720
 # ╠═85033040-f372-11ea-2c31-bb3147de3c0d
@@ -1878,6 +1935,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─56a7f954-f374-11ea-0391-f79b75195f4d
 # ╠═b1d09bc8-f320-11ea-26bb-0101c9a204e2
 # ╠═1947f304-fa2c-4019-8584-01ef44ef2859
+# ╠═0c7f8938-854d-4a9a-8415-e141d8420a1a
 # ╟─8992172e-c5b6-463e-a06e-5fe42fb9b16b
 # ╠═b387f8e8-dced-473a-9434-5334829ecfd1
 # ╟─344964a8-7c6b-4720-a624-47b03483263b
@@ -1885,8 +1943,8 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═d941c199-ed77-47dd-8b5a-e34b864f9a79
 # ╠═726280f0-682f-4b05-bf5a-688554a96287
 # ╟─c1ab3d5f-8e6c-4702-ad40-6c7f787f1c43
-# ╟─4e3bcf88-f3c5-11ea-3ada-2ff9213647b7
-# ╟─4e3ef866-f3c5-11ea-3fb0-27d1ca9a9a3f
+# ╠═4e3bcf88-f3c5-11ea-3ada-2ff9213647b7
+# ╠═4e3ef866-f3c5-11ea-3fb0-27d1ca9a9a3f
 # ╟─6e73b1da-f3c5-11ea-145f-6383effe8a89
 # ╟─cf39fa2a-f374-11ea-0680-55817de1b837
 # ╠═c8724b5e-f3bd-11ea-0034-b92af21ca12d
@@ -1905,9 +1963,9 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─e06d4e4a-146c-4dbd-b742-317f638a3bd8
 # ╟─92e19f22-f37b-11ea-25f7-e321337e375e
 # ╠═795eb2c4-f37b-11ea-01e1-1dbac3c80c13
-# ╟─51df0c98-f3c5-11ea-25b8-af41dc182bac
-# ╟─51e28596-f3c5-11ea-2237-2b72bbfaa001
-# ╟─0a10acd8-f3c6-11ea-3e2f-7530a0af8c7f
+# ╠═51df0c98-f3c5-11ea-25b8-af41dc182bac
+# ╠═51e28596-f3c5-11ea-2237-2b72bbfaa001
+# ╠═0a10acd8-f3c6-11ea-3e2f-7530a0af8c7f
 # ╟─946b69a0-f3a2-11ea-2670-819a5dafe891
 # ╟─0fbe2af6-f381-11ea-2f41-23cd1cf930d9
 # ╟─48089a00-f321-11ea-1479-e74ba71df067

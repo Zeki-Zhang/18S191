@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -68,7 +68,13 @@ A suitable data structure for this is a **dictionary**, since it allows us to st
 # ╔═╡ 2bebafd4-8c4d-11eb-14ba-27ab7eb763c1
 function counts(data::Vector)
 	counts = Dict{Int,Int}()
-	
+	for i in data
+		if haskey(counts, i)
+			counts[i] += 1
+		else
+			counts[i] = 1
+		end
+	end
 	# your code here
 	
 	return counts
@@ -99,10 +105,10 @@ We are going to make a new version `counts2` where you do the following (below).
 """
 
 # ╔═╡ 4bbbbd24-d592-4ce3-a619-b7f760672b99
-
+ks = collect(keys(test_counts))
 
 # ╔═╡ 44d0f365-b2a8-41a2-98d3-0aa34e8c80c0
-
+vs = collect(values(test_counts))
 
 # ╔═╡ 18094d52-8c4d-11eb-0620-d30c24a8c75e
 md"""
@@ -110,7 +116,7 @@ md"""
 """
 
 # ╔═╡ c825f913-9545-4dbd-96f9-5f7621fc242d
-
+perm = sortperm(ks)
 
 # ╔═╡ 180fc1d2-8c4d-11eb-0362-230d84d47c7f
 md"""
@@ -121,10 +127,10 @@ md"""
 """
 
 # ╔═╡ fde456e5-9985-4939-af59-9b9a92313b61
-
+ks[perm]
 
 # ╔═╡ cc6923ff-09e0-44cc-9385-533182c4382d
-
+vs[perm]
 
 # ╔═╡ 18103c98-8c4d-11eb-2bed-ed20aba64ae6
 md"""
@@ -138,12 +144,19 @@ md"""
 
 # ╔═╡ 156c1bea-8c4f-11eb-3a7a-793d0a056f80
 function counts2(data::Vector)
+	dict = counts(data)
+	kss = collect(keys(dict))
+	vss = collect(values(dict))
+	perm = sortperm(kss)
 	
-	return missing
+	return (kss[perm], vss[perm])
 end
 
 # ╔═╡ 37294d02-8c4f-11eb-141e-0be49ea07611
 counts2(test_data)
+
+# ╔═╡ 795a5c12-fbc7-4f27-87a8-4182860c1692
+counts2([51,-52,-52,53,51])[2]
 
 # ╔═╡ 18139dc0-8c4d-11eb-0c31-a75361ed7321
 md"""
@@ -159,8 +172,9 @@ We will use this function in the rest of the exercises.
 
 # ╔═╡ 447bc642-8c4f-11eb-1d4f-750e883b81fb
 function probability_distribution(data::Vector)
-	
-	return missing
+	ks = counts2(data)[1]
+	vs = counts2(data)[2] ./ sum(counts2(data)[2])
+	return (ks, vs)
 end
 
 # ╔═╡ 6b1dc96a-8c4f-11eb-27ca-ffba02520fec
@@ -254,7 +268,7 @@ md"""
 # ╔═╡ 0233835a-8c50-11eb-01e7-7f80bd27683e
 function bernoulli(p::Real)
 	
-	return missing
+	return rand() < p
 end
 
 # ╔═╡ fdb3f1c8-8c4f-11eb-2281-bf01205bb804
@@ -266,13 +280,18 @@ md"""
 
 # ╔═╡ 08028df8-8c50-11eb-3b22-fdf5104a4d52
 function geometric(p::Real)
-	
-	
-	return missing
+	if p <= 0
+		error("p must be positive!")
+	end
+	t = 1
+	while bernoulli(p) == false
+		t += 1
+	end
+	return t
 end
 
 # ╔═╡ 2b35dc1c-8c50-11eb-3517-83589f2aa8cc
-geometric(0.25)
+geometric(1)
 
 # ╔═╡ e125bd7f-1881-4cff-810f-8af86850249d
 md"""
@@ -305,7 +324,7 @@ md"""
 # ╔═╡ 32700660-8c50-11eb-2fdf-5d9401c07de3
 function experiment(p::Real, N::Integer)
 	
-	return missing
+	return [geometric(p) for i in 1:N]
 end
 
 # ╔═╡ 192caf02-5234-4379-ad74-a95f3f249a72
@@ -335,7 +354,7 @@ md"""
 """
 
 # ╔═╡ 25ae71d0-e6e2-45ff-8900-3caf6fcea937
-
+sum(large_experiment)/length(large_experiment)
 
 # ╔═╡ 3a7c7ca2-e879-422e-a681-d7edd271c018
 md"""
@@ -346,7 +365,10 @@ Note that `vline!` requires a *vector* of values where you wish to draw vertical
 
 # ╔═╡ 97d7d154-8c50-11eb-2fdd-fdf0a4e402d3
 let
-	
+	xs, ps = probability_distribution(large_experiment)
+		
+	bar(xs, ps, alpha=0.5, leg=false)	
+	vline!([sum(large_experiment)/length(large_experiment)], ls=:dash)
 	# your code here
 end
 
@@ -391,7 +413,13 @@ md"""
 """
 
 # ╔═╡ 1b1f870f-ee4d-497f-8d4b-1dba737be075
-
+let
+	xs, ps = probability_distribution(large_experiment)
+		
+	bar(xs, ps, alpha=0.5, leg=false, yscale=:log10)	
+	vline!([sum(large_experiment)/length(large_experiment)], ls=:dash)
+	# your code here
+end
 
 # ╔═╡ fdcb1c1a-8c4f-11eb-0aeb-3fae27eaacbd
 md"""
@@ -409,16 +437,22 @@ As you vary $p$, what do you observe? Does that make sense?
 hello
 
 # ╔═╡ 48751015-c374-4a77-8a00-bca81bbc8305
-
+@bind p Slider(0:0.1:1, default=0.1, show_value=true)
 
 # ╔═╡ 562202be-5eac-46a4-9542-e6593bc39ff9
-
+@bind N Slider(0:1000:1000000, default=1000, show_value=true)
 
 # ╔═╡ e8d2a4ab-b710-4c16-ab71-b8c1e71fe442
-
+function geometric_experiment(p,N)
+	result = experiment(p,N)
+	xs, ps = probability_distribution(result)
+		
+	bar(xs, ps, alpha=0.5, leg=false)	
+	vline!([sum(result)/length(result)], ls=:dash)
+end
 
 # ╔═╡ a486dc37-609d-4aae-b4ec-71de726191c7
-
+geometric_experiment(p,N)
 
 # ╔═╡ 65ea5492-d833-4754-89a3-0aa671c3ec7a
 
@@ -457,7 +491,7 @@ md"""
 Based on my observations, it looks like we have the following relationship:
 
 ```math
-\langle \tau(p) \rangle = my \cdot answer \cdot here
+\langle \tau(p) \rangle = {1 \over p}
 ```
 """
 
@@ -480,7 +514,8 @@ md"""
 
 # ╔═╡ 45735d82-8c52-11eb-3735-6ff9782dde1f
 Ps = let 
-	
+	p = .25
+	[p*(1-p)^(i-1) for  i in 1:50]
 	# your code here
 end
 
@@ -491,7 +526,7 @@ md"""
 """
 
 # ╔═╡ 3df70c76-1aa6-4a0c-8edf-a6e3079e406b
-
+sum(Ps)
 
 # ╔═╡ b1ef5e8e-8c52-11eb-0d95-f7fa123ee3c9
 md"""
@@ -503,7 +538,7 @@ md"""
 md"""
 
 ```math
-\sum_{k=1}^{\infty} P_k = \dots your \cdot answer \cdot here \dots = 1
+\sum_{k=1}^{\infty} P_k = p{{1-(1-p)}^{\infty} \over {1-(1-p)}} = 1
 
 ```
 """
@@ -519,7 +554,17 @@ md"""
 	"""
 
 # ╔═╡ dd59f48c-bb22-47b2-8acf-9c4ee4457cb9
+function geometric_experiment2(p,N)
+	result = experiment(p,N)
+	xs, ps = probability_distribution(result)
+	Pₙ = [p*(1-p)^(i-1) for  i in 1:length(xs)]
+	bar(xs, ps, alpha=0.5, leg=false)
+	bar!(xs, Pₙ, alpha=.5, leg=false, col=:red)
+	vline!([sum(result)/length(result)], ls=:dash)
+end
 
+# ╔═╡ f81da506-89ea-4f7f-bca3-125e968a04d6
+geometric_experiment2(p,N)
 
 # ╔═╡ 5907dc0a-de60-4b58-ac4b-1e415f0051d2
 md"""
@@ -552,8 +597,10 @@ md"""
 
 # ╔═╡ 5185c938-8c53-11eb-132d-83342e0c775f
 function cumulative_sum(xs::Vector)
-	
-	return missing
+	for i in 2:length(xs)
+		xs[i] += xs[i-1]
+	end
+	return xs
 end
 
 # ╔═╡ e4095d34-552e-495d-b318-9afe6839d577
@@ -579,7 +626,7 @@ md"""
 # ╔═╡ 1ae91530-c77e-4d92-9ad3-c969bc7e1fa8
 md"""
 ```math
-C_n := \sum_{k=1}^n P_k = my \cdot answer \cdot here
+C_n := \sum_{k=1}^n P_k = 1-(1-p)^n
 ```
 """
 
@@ -594,7 +641,7 @@ md"""
 # ╔═╡ 16b4e98c-4ae7-4145-addf-f43a0a96ec82
 md"""
 ```math
-n(r,p) = my \cdot answer \cdot here
+n(r,p) = (\log_{1-p}(1-r) - 1, \log_{1-p}(1-r))
 ```
 """
 
@@ -607,8 +654,8 @@ md"""
 
 # ╔═╡ 47d56992-8c54-11eb-302a-eb3153978d26
 function geometric_bin(u::Real, p::Real)
-	
-	return missing
+	n = floor(Int, log(1-p, 1-u))
+	return n
 end
 
 # ╔═╡ adfb343d-beb8-4576-9f2a-d53404cee42b
@@ -629,7 +676,10 @@ md"""
 """
 
 # ╔═╡ 1d007d99-2526-4c19-9c96-3fad1750670e
-
+let
+	samples = [geometric_fast(10^(-10)) for i in 1:10000]
+	histogram(samples)
+end
 
 # ╔═╡ c37bbb1f-8f5e-4097-9104-43ef65aa1cbd
 
@@ -655,8 +705,19 @@ md"""
 
 # ╔═╡ 2270e6ba-8c5e-11eb-3600-615519daa5e0
 function atmosphere(p::Real, y0::Real, N::Integer)
-	
-	return missing
+	height = fill(y0,N)
+	for i in 2:N
+		if rand() < p
+			if height[i-1] == 1
+				height[i] = 1
+			else
+				height[i] = height[i-1] - 1
+			end
+		else
+			height[i] = height[i-1] + 1
+		end
+	end
+	return height[N]
 end
 
 # ╔═╡ 225bbcbd-0628-4151-954e-9a85d1020fd9
@@ -671,8 +732,17 @@ Let's simulate it for $10^7$ time steps with $x_0 = 10$ and $p=0.55$.
 👉 Calculate and plot the probability distribution of the walker's height.
 """
 
-# ╔═╡ deb5fbfb-1e03-42ce-a6d6-c8d3edd89a9a
+# ╔═╡ 638fb813-56b3-4e38-ad8e-f0c34828a76f
+@bind NN Slider(1000:500:3000, show_value=true)
 
+# ╔═╡ deb5fbfb-1e03-42ce-a6d6-c8d3edd89a9a
+let
+	result = zeros(NN)
+	Threads.@threads for i in 1:NN
+		result[i] = atmosphere(.55, 10, 10^6)
+	end
+	histogram(result, normalize=true)
+end
 
 # ╔═╡ 8517f92b-d4d3-46b5-9b9a-e609175b6481
 
@@ -1121,7 +1191,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[EarCut_jll]]
@@ -1147,6 +1217,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1963,6 +2036,7 @@ version = "0.9.1+5"
 # ╟─bfa216a2-ffa6-4716-a057-62a58fd9f04a
 # ╠═156c1bea-8c4f-11eb-3a7a-793d0a056f80
 # ╠═37294d02-8c4f-11eb-141e-0be49ea07611
+# ╠═795a5c12-fbc7-4f27-87a8-4182860c1692
 # ╟─2b6a64b9-779b-47d1-9724-ad066f14fbff
 # ╟─18139dc0-8c4d-11eb-0c31-a75361ed7321
 # ╠═447bc642-8c4f-11eb-1d4f-750e883b81fb
@@ -2034,6 +2108,7 @@ version = "0.9.1+5"
 # ╟─1b6035fb-d8fc-437f-b75e-f1a6b3b4cae7
 # ╟─c3cb9ea0-5e0e-4d5a-ab23-80ed8d91209c
 # ╠═dd59f48c-bb22-47b2-8acf-9c4ee4457cb9
+# ╠═f81da506-89ea-4f7f-bca3-125e968a04d6
 # ╟─5907dc0a-de60-4b58-ac4b-1e415f0051d2
 # ╠═c7093f08-52d2-4f22-9391-23bd196c6fb9
 # ╟─316f369a-c051-4a35-9c64-449b12599295
@@ -2065,6 +2140,7 @@ version = "0.9.1+5"
 # ╠═2270e6ba-8c5e-11eb-3600-615519daa5e0
 # ╠═225bbcbd-0628-4151-954e-9a85d1020fd9
 # ╟─1dc5daa6-8c5e-11eb-1355-b1f627d04a18
+# ╠═638fb813-56b3-4e38-ad8e-f0c34828a76f
 # ╠═deb5fbfb-1e03-42ce-a6d6-c8d3edd89a9a
 # ╠═8517f92b-d4d3-46b5-9b9a-e609175b6481
 # ╠═c1e3f066-5e12-4018-9fb2-4e7fc13172ba

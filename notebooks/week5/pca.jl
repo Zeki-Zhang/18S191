@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -169,6 +169,9 @@ md"""
 
 Make an interactive visualisation of a random rank-$n$ matrix where you can vary $n$.
 """
+
+# ╔═╡ 596f1d33-5e2c-4360-8cb1-21457b7609a2
+@bind n Slider(1:5, show_value = true)
 
 # ╔═╡ dc55775a-815b-11eb-15b7-7993190bffab
 md"""
@@ -638,7 +641,7 @@ There are algorithms from numerical linear algebra to calculate this decompositi
 # ╔═╡ 453689c2-85a2-11eb-2cbc-7d6476b42f2f
 let
 	M = [2 1
-		 1 1]
+		 1  1]
 	
 	svd(M)
 end
@@ -769,6 +772,15 @@ begin
 	         outer(rand(52), rand(w))
 	
 	show_image(image2)
+end
+
+# ╔═╡ 5dcd6309-0fa8-457c-ba24-a073a9b283f8
+begin
+	image_n = zeros(w,w)
+	for i in 1:n
+		image_n += outer([i; rand(w-1)], rand(w))
+	end
+	show_image(image_n)
 end
 
 # ╔═╡ f6713bec-815b-11eb-2fc4-6b0326a64b16
@@ -1017,7 +1029,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[DualNumbers]]
@@ -1073,6 +1085,9 @@ deps = ["Pkg", "Requires", "UUIDs"]
 git-tree-sha1 = "9267e5f50b0e12fdfd5a2455534345c4cf2c7f7a"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.14.0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -2230,6 +2245,8 @@ version = "0.9.1+5"
 # ╠═74c04322-815b-11eb-2308-7b3d571cf613
 # ╟─b5094384-815b-11eb-06fd-1f40134c6fd8
 # ╟─cc4f3fee-815b-11eb-2982-9b797b806b45
+# ╠═596f1d33-5e2c-4360-8cb1-21457b7609a2
+# ╠═5dcd6309-0fa8-457c-ba24-a073a9b283f8
 # ╟─dc55775a-815b-11eb-15b7-7993190bffab
 # ╟─9cf23f9a-f864-11ea-3a08-af448aceefd8
 # ╠═a5b62530-f864-11ea-21e8-71ccfed487f8

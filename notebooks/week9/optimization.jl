@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -155,6 +155,9 @@ md"""
 # ╔═╡ 613c3e5f-bbdd-4cf9-b30f-69e2c42ae0ec
 nt = (first=1, next=2, last=3.1) # kind of handy
 
+# ╔═╡ d3000e26-a0c6-4652-bd99-20096f729a5a
+nt.first
+
 # ╔═╡ 4cce580b-0032-419c-b386-e470b084ab96
 typeof( nt )
 
@@ -172,7 +175,10 @@ This is even shorter, but you need to know linear algebra. But it also generaliz
 """
 
 # ╔═╡ e0b4c2a9-a68b-47af-bf9c-f1a9f0256fd4
-[one.(x) x]\y  # even shorter but you need to know linear algebra, but generalizes
+v,k = [one.(x) x]\y  # even shorter but you need to know linear algebra, but generalizes
+
+# ╔═╡ 449522e0-7d01-4d9d-ad76-21e1e9442726
+v
 
 # ╔═╡ 6d25e38e-c18a-48b3-8b12-b670f5a5180f
 md"""
@@ -286,6 +292,9 @@ md"""
 # ╔═╡ ad578b33-4387-49f5-b39d-92e05fca4ea5
 ∇loss(.1,.3)
 
+# ╔═╡ 99fcd9aa-a44b-453f-8f4e-b0430c6c0983
+loss
+
 # ╔═╡ 67fd90d7-bb34-411f-89f1-a410e6fb29ba
 begin # finite difference
 	ϵ = .000000001
@@ -314,7 +323,7 @@ md"""
 let
 	b, m = 0, 0  # starting guess
 	
-	for i=1:25
+	for i=1:100
 		db, dm = ∇loss(b,m)
 		
 		# Getting a good step size can be really hard
@@ -342,17 +351,44 @@ Pick one term of the sum (or a few of them) and update according to the
 respective gradient. This is what works in machine learning.
 """
 
+# ╔═╡ 68e2ec42-3ecb-4b5c-8fba-fa7023fb5c50
+[one.(x) x]\y
+
 # ╔═╡ 7086950b-c8db-49d4-b095-15be91c73b56
+# ╠═╡ disabled = true
+#=╠═╡
 let
 	b, m  = 0.0, 0.0
-	for t=1:10_000_000
-	    η = .00002  # there seems to be an art to picking these steplengths
-	 
-	    b, m  =  (b, m) .- η *∇loss(b,m, rand(1:n))
+	slope = ∇loss(b,m,rand(1:n))
+	err = .0001
+	η = .00002  # there seems to be an art to picking these steplengths
+	while maximum(abs, slope) > err
+	     
+	 	
+	    b, m  =  (b, m) .- η .* slope
+	    slope = ∇loss(b,m,rand(1:n))
+	end
+   	(b=b, m=m)
+end
+  ╠═╡ =#
+
+# ╔═╡ d4ff0a0d-0001-478c-a6e0-db5711907436
+# ╠═╡ disabled = true
+#=╠═╡
+let
+	b, m  = 0.0, 0.0
+	slope = ForwardDiff.gradient( loss, [b,m])
+	err = .0001
+	η = .00002  # there seems to be an art to picking these steplengths
+	while sum(abs, slope) > err
+	     
+	 	slope = ForwardDiff.gradient( loss, [b,m])
+	    b, m  =  (b, m) .- η .* slope
 	   
 	end
    	(b=b, m=m)
 end
+  ╠═╡ =#
 
 # ╔═╡ 327514f1-8081-4a6c-8be4-8ffd52ed3c46
 md"""
@@ -360,10 +396,10 @@ md"""
 """
 
 # ╔═╡ 98e00b2d-0802-4160-8e5c-302be5226916
-optimize(loss, [0.0,0.0], BFGS(),  autodiff=:forward)
+optimize(loss, [1.0,1.0], BFGS(),  autodiff=:forward)
 
 # ╔═╡ ef165ca5-bf4f-465e-8e9a-df1aec2d7caa
-optimize(loss, [0.0,0.0], BFGS() )
+optimize(loss, [1.0,1.0], BFGS() )
 
 # ╔═╡ 0305b418-51bb-47bb-98fb-319fc26b94cf
 optimize(loss, [0.0,0.0], GradientDescent() )
@@ -415,6 +451,7 @@ version = "3.3.3"
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[ArrayInterface]]
 deps = ["Compat", "IfElse", "LinearAlgebra", "Requires", "SparseArrays", "Static"]
@@ -515,6 +552,7 @@ version = "3.43.0"
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[Contour]]
 deps = ["StaticArrays"]
@@ -569,8 +607,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -595,6 +634,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -824,10 +866,12 @@ version = "0.15.15"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -836,6 +880,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -944,6 +989,7 @@ version = "1.0.3"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -961,6 +1007,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
@@ -981,6 +1028,7 @@ version = "0.3.7"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -997,10 +1045,12 @@ version = "0.3.17+0"
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1058,6 +1108,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1147,6 +1198,7 @@ version = "1.3.0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -1223,6 +1275,7 @@ version = "0.6.7"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1239,6 +1292,7 @@ version = "1.7.0"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1442,6 +1496,7 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1458,6 +1513,7 @@ version = "0.15.1+0"
 [[libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1480,10 +1536,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1508,8 +1566,8 @@ version = "0.9.1+5"
 # ╟─945c2bf1-d7dc-42c9-93d7-fd754f8fb1d7
 # ╠═400ebe26-0dea-4cf2-8744-6c73a45cd33e
 # ╠═b8d66df5-f593-40b4-8c46-3b638f9cc3e1
-# ╟─77253dd5-a2c8-4cf5-890a-5c8420c395b7
-# ╟─dccbd53d-33ed-4d37-9d2c-da76e090d5dd
+# ╠═77253dd5-a2c8-4cf5-890a-5c8420c395b7
+# ╠═dccbd53d-33ed-4d37-9d2c-da76e090d5dd
 # ╟─235919f2-a4b0-4bb5-870c-82809a170195
 # ╟─2ed86f33-bced-413c-9a8d-c6e49bfe5afb
 # ╟─a78aff8d-5ac0-4915-92de-ffefdb08f88e
@@ -1519,16 +1577,18 @@ version = "0.9.1+5"
 # ╠═647093eb-a7e3-4175-8091-29c33407e5c9
 # ╟─cdc25782-65a8-43c5-8090-c1241b798b1a
 # ╟─9ec4dd43-c95a-4f11-b844-fd6ccc93bb68
-# ╟─9276b315-27b2-4b01-8fc8-4ebbba58d080
+# ╠═9276b315-27b2-4b01-8fc8-4ebbba58d080
 # ╟─d22fd4bd-acfe-4e27-a484-3c2d6138f44e
 # ╠═da0d208b-7d30-470a-b180-4cbfa98298e7
 # ╟─6cf233a7-9b8b-47aa-a3ad-2440d001af73
 # ╠═613c3e5f-bbdd-4cf9-b30f-69e2c42ae0ec
+# ╠═d3000e26-a0c6-4652-bd99-20096f729a5a
 # ╠═4cce580b-0032-419c-b386-e470b084ab96
 # ╠═5503b4de-0b53-4223-8ce0-5e014be3f7ab
 # ╟─05e512ca-3123-48d9-9c11-5d6e9d90ef95
 # ╟─939900b4-5327-43b4-883f-740c173c0db4
 # ╠═e0b4c2a9-a68b-47af-bf9c-f1a9f0256fd4
+# ╠═449522e0-7d01-4d9d-ad76-21e1e9442726
 # ╟─6d25e38e-c18a-48b3-8b12-b670f5a5180f
 # ╟─f291c0cb-51ee-4b30-9e07-e7cf374f809e
 # ╟─aa06a447-d6c5-48ee-9864-c1f431fe5e4b
@@ -1546,6 +1606,7 @@ version = "0.9.1+5"
 # ╠═6f64ede7-612e-47b3-b3a4-d22a1992a98d
 # ╟─36300b71-5a96-4964-b661-93de5631cf07
 # ╠═ad578b33-4387-49f5-b39d-92e05fca4ea5
+# ╠═99fcd9aa-a44b-453f-8f4e-b0430c6c0983
 # ╠═67fd90d7-bb34-411f-89f1-a410e6fb29ba
 # ╟─3e229e4a-a697-460e-b995-a4773a6aca70
 # ╠═7566cb7e-f5da-4b81-af07-bf2c86963333
@@ -1554,7 +1615,9 @@ version = "0.9.1+5"
 # ╠═6535280a-e0ce-4e13-86dd-165d5f06cfe7
 # ╟─4c285bc2-b3c2-4d20-a904-ecaa07795342
 # ╟─592397eb-ec52-423b-925b-d8becb9eac8e
+# ╠═68e2ec42-3ecb-4b5c-8fba-fa7023fb5c50
 # ╠═7086950b-c8db-49d4-b095-15be91c73b56
+# ╠═d4ff0a0d-0001-478c-a6e0-db5711907436
 # ╟─327514f1-8081-4a6c-8be4-8ffd52ed3c46
 # ╠═98e00b2d-0802-4160-8e5c-302be5226916
 # ╠═ef165ca5-bf4f-465e-8e9a-df1aec2d7caa

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -96,16 +96,21 @@ _When running this notebook for the first time, this could take up to 15 minutes
 # ╔═╡ 890d30b9-2cd0-4d3a-99f6-f7d3d7858fda
 corgis_url = "https://user-images.githubusercontent.com/6933510/108605549-fb28e180-73b4-11eb-8520-7e29db0cc965.png"
 
+# ╔═╡ 96766502-7a06-11eb-00cc-29849773dbcf
+ img_original = load(download(corgis_url));
+# img_original = load(download(longcorgi_url));
+# img_original = load(download(theteam_url));
+#img_original = load(download(lindsay_url));
+
 # ╔═╡ 85fba8fb-a9ea-444d-831b-ec6489b58b4f
 longcorgi_url = "https://user-images.githubusercontent.com/6933510/110868198-713faa80-82c8-11eb-8264-d69df4509f49.png"
 
-# ╔═╡ 96766502-7a06-11eb-00cc-29849773dbcf
-# img_original = load(download(corgis_url));
-img_original = load(download(longcorgi_url));
-# img_original = load(download(theteam_url));
-
 # ╔═╡ 06beabc3-2aa7-4e78-9bae-dc4b37251aa2
 theteam_url = "https://news.mit.edu/sites/default/files/styles/news_article__image_gallery/public/images/202004/edelman%2520philip%2520sanders.png?itok=ZcYu9NFeg"
+
+# ╔═╡ 1aa3c0d5-9055-4e1c-bbf6-424b00cf0011
+lindsay_url =
+"https://a4.pbase.com/o2/17/693417/1/124289240.8VSZVo2j.IMG_49781.jpg"
 
 # ╔═╡ 26dd0e98-7a75-11eb-2196-5d7bda201b19
 md"""
@@ -294,18 +299,18 @@ end
 # ╔═╡ 58a30e54-7a08-11eb-1c57-dfef0000255f
 # T⁻¹ = id
 #  T⁻¹ = rotate(α)
-  T⁻¹ = shear(α)
+#  T⁻¹ = shear(α)
 #   T⁻¹ = lin(A) # uses the scrubbable 
 #   T⁻¹ = shear(α) ∘ shear(-α)
- # T⁻¹ = nonlin_shear(α)  
- #   T⁻¹ =   inverse(nonlin_shear(α))
+#  T⁻¹ = nonlin_shear(α)  
+#    T⁻¹ =   inverse(nonlin_shear(α))
 #    T⁻¹ =  nonlin_shear(-α)
 #  T⁻¹ =  xy 
 # T⁻¹ = warp(α)
 # T⁻¹ = ((x,y),)-> (x+α*y^2,y+α*x^2) # may be non-invertible
 
 # T⁻¹ = ((x,y),)-> (x,y^2)  
-# T⁻¹  = flipy ∘ ((x,y),) ->  ( (β*x - α*y)/(β - y)  , -h*y/ (β - y)   ) 
+ T⁻¹  = flipy ∘ ((x,y),) ->  ( (β*x - α*y)/(β - y)  , -h*y/ (β - y)   ) 
 
 # ╔═╡ 080d87e0-7aa2-11eb-18f5-2fb6a7a5bcb4
 md"""
@@ -356,6 +361,9 @@ let
 	
 	( sin ∘ cos )(x) ≈ sin(cos(x))
 end
+
+# ╔═╡ 7d6917ac-e4ae-4a35-9ed7-a567c0e38a0e
+\is
 
 # ╔═╡ 44792484-7a20-11eb-1c09-95b27b08bd34
 md"""
@@ -965,19 +973,19 @@ transform_xy_to_ij(img,0.0,0.0)
 
 
 # ╔═╡ c2e0e032-7c4c-11eb-2b2a-27fe69c42a01
-img;
+img
 
 # ╔═╡ c662e3d8-7c4c-11eb-0dcf-f9da2bd14baf
 size(img)
 
 # ╔═╡ d0e9a1e8-7c4c-11eb-056c-aff283c49c31
-img[50,56]
+img[400,400]
 
 # ╔═╡ 4d0de3d3-f006-4537-a7c8-81c65f16f861
 white_background(x) = PlutoUI.ExperimentalLayout.Div([x]; style="background: white")
 
 # ╔═╡ 7c68c7b6-7a9e-11eb-3f7f-99bb10aedd95
-Resource("https://raw.githubusercontent.com/mitmath/18S191/Spring21/notebooks/week3/coord_transform.png") |> white_background
+Resource("https://a4.pbase.com/o2/17/693417/1/124289240.8VSZVo2j.IMG_49781.jpg") |> white_background
 
 # ╔═╡ 80456168-7c1b-11eb-271c-83ef59a41102
 Resource("https://raw.githubusercontent.com/mitmath/18S191/Spring21/notebooks/week3/collide.png") |> white_background
@@ -1178,7 +1186,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[FileIO]]
@@ -1186,6 +1194,9 @@ deps = ["Pkg", "Requires", "UUIDs"]
 git-tree-sha1 = "9267e5f50b0e12fdfd5a2455534345c4cf2c7f7a"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.14.0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -1801,6 +1812,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─890d30b9-2cd0-4d3a-99f6-f7d3d7858fda
 # ╟─85fba8fb-a9ea-444d-831b-ec6489b58b4f
 # ╟─06beabc3-2aa7-4e78-9bae-dc4b37251aa2
+# ╠═1aa3c0d5-9055-4e1c-bbf6-424b00cf0011
 # ╟─26dd0e98-7a75-11eb-2196-5d7bda201b19
 # ╟─e0b657ce-7a03-11eb-1f9d-f32168cb5394
 # ╟─005ca75a-7622-11eb-2ba4-9f450e71df1f
@@ -1808,7 +1820,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═58a30e54-7a08-11eb-1c57-dfef0000255f
 # ╟─2efaa336-7630-11eb-0c17-a7d4a0141dac
 # ╟─7f28ac40-7914-11eb-1403-b7bec34aeb94
-# ╟─ce55beee-7643-11eb-04bc-b517703facff
+# ╠═ce55beee-7643-11eb-04bc-b517703facff
 # ╠═b76a5bd6-802f-11eb-0951-1f1092dee8de
 # ╟─5d33f6ea-7e9c-11eb-2fb3-dbb7cb07c60c
 # ╟─45dccdec-7912-11eb-01b4-a97e30344f39
@@ -1836,6 +1848,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═b4cdd412-7a02-11eb-149a-df1888a0f465
 # ╟─704a87ec-7a1e-11eb-3964-e102357a4d1f
 # ╠═4b0e8742-7a70-11eb-1e78-813f6ad005f4
+# ╠═7d6917ac-e4ae-4a35-9ed7-a567c0e38a0e
 # ╟─44792484-7a20-11eb-1c09-95b27b08bd34
 # ╟─f650b788-7a70-11eb-0b20-779d2f18f111
 # ╟─c852d398-7aa2-11eb-2ded-ab2e5236e9b2
@@ -1879,7 +1892,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─155cd218-7a91-11eb-0b4c-bd028507e925
 # ╟─fd25da12-7a92-11eb-20c0-995e7c46b3bc
 # ╟─1ab2265e-7c1d-11eb-26df-39c4c7289243
-# ╟─7c68c7b6-7a9e-11eb-3f7f-99bb10aedd95
+# ╠═7c68c7b6-7a9e-11eb-3f7f-99bb10aedd95
 # ╠═7d0096ad-d89a-4ade-9679-6ee95f7d2044
 # ╠═bf1954d6-7e9a-11eb-216d-010bd761e470
 # ╠═c1efc54a-7e9b-11eb-1e76-dbd0a66184a9

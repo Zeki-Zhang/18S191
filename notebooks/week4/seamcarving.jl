@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -131,10 +131,8 @@ image_urls = [
 
 "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Gustave_Caillebotte_-_Paris_Street%3B_Rainy_Day_-_Google_Art_Project.jpg/1014px-Gustave_Caillebotte_-_Paris_Street%3B_Rainy_Day_-_Google_Art_Project.jpg",
 
-"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Gustave_Caillebotte_-_Paris_Street%3B_Rainy_Day_-_Google_Art_Project.jpg/1014px-Gustave_Caillebotte_-_Paris_Street%3B_Rainy_Day_-_Google_Art_Project.jpg",
 
 "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg/480px-Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg",
-		"https://wisetoast.com/wp-content/uploads/2015/10/The-Persistence-of-Memory-salvador-deli-painting.jpg",
 
 "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/640px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg",
 
@@ -731,7 +729,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[EarCut_jll]]
@@ -781,6 +779,9 @@ deps = ["Pkg", "Requires", "UUIDs"]
 git-tree-sha1 = "9267e5f50b0e12fdfd5a2455534345c4cf2c7f7a"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.14.0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1758,9 +1759,9 @@ version = "0.9.1+5"
 # ╠═405a4f82-8116-11eb-1b35-2563b06b02a7
 # ╟─cb335074-eef7-11ea-24e8-c39a325166a1
 # ╟─7b0cee56-8106-11eb-0979-e7fead945a6f
-# ╟─3721e7f9-83fa-48cd-a1f5-e72e07b0f7a2
+# ╠═3721e7f9-83fa-48cd-a1f5-e72e07b0f7a2
 # ╠═90f44be8-f35c-11ea-2fc6-c361fd4966af
-# ╟─d2ae6dd2-eef9-11ea-02df-255ec3b46a36
+# ╠═d2ae6dd2-eef9-11ea-02df-255ec3b46a36
 # ╟─0b6010a8-eef6-11ea-3ad6-c1f10e30a413
 # ╠═fc1c43cc-eef6-11ea-0fc4-a90ac4336964
 # ╟─82c0d0c8-efec-11ea-1bb9-83134ecb877e
@@ -1772,12 +1773,12 @@ version = "0.9.1+5"
 # ╠═42f2105a-810b-11eb-0e47-2dbb5ea2f566
 # ╠═406a65c0-810a-11eb-3c57-6d5be524ee3f
 # ╟─ac8d6902-f069-11ea-0f1d-9b0fa706d769
-# ╟─ddac52ea-f148-11ea-2860-21cff4c867e6
+# ╠═ddac52ea-f148-11ea-2860-21cff4c867e6
 # ╠═6f7bd064-eff4-11ea-0260-f71aa7f4f0e5
 # ╟─d6a268c0-eff4-11ea-2c9e-bfef19c7f540
 # ╟─172c7612-efee-11ea-077a-5d5c6e2505a4
 # ╟─fcf46120-efec-11ea-06b9-45f470899cb2
-# ╟─dec62538-efee-11ea-1e03-0b801e61e91c
+# ╠═dec62538-efee-11ea-1e03-0b801e61e91c
 # ╟─f8283a0e-eff4-11ea-23d3-9f1ced1bafb4
 # ╟─025e2c94-eefb-11ea-12cb-f56f34886334
 # ╠═acc1ee8c-eef9-11ea-01ac-9b9e9c4167b3
@@ -1807,8 +1808,8 @@ version = "0.9.1+5"
 # ╠═7038abe4-ef36-11ea-11a5-75e57ab51032
 # ╟─2d6c6820-ef2d-11ea-1704-49bb5188cfcc
 # ╠═fa6a2152-ef0f-11ea-0e67-0d1a6599e779
-# ╟─71b16dbe-f08b-11ea-2343-5f1583074029
-# ╟─1fd26a60-f089-11ea-1f56-bb6eba7d9651
-# ╟─15d1e5dc-ef2f-11ea-093a-417108bcd495
+# ╠═71b16dbe-f08b-11ea-2343-5f1583074029
+# ╠═1fd26a60-f089-11ea-1f56-bb6eba7d9651
+# ╠═15d1e5dc-ef2f-11ea-093a-417108bcd495
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -16,7 +16,7 @@ end
 
 # ╔═╡ c7d387fa-cd19-458c-a45d-7893e8c21bbf
 begin
-    using DifferentialEquations, Plots, PlutoUI, LinearAlgebra, CSV, DataFrames
+    using DifferentialEquations, Plots, PlutoUI, LinearAlgebra, CSV, DataFrames, LaTeXStrings
 end
 
 # ╔═╡ 42085492-ac8c-11eb-0620-adcb307077f1
@@ -204,12 +204,13 @@ end
 md"""#### 1) Background: climate physics
 
 The simplest climate model can be conceptualized as:
-\begin{align}
+
+``\begin{align}
 \text{\color{brown}{change in heat content}} = & + \text{\color{orange}{absorbed solar radiation (energy from the Sun's rays)}} \newline
 & - \text{\color{blue}{outgoing thermal radiation (i.e. blackbody cooling to space)}}
 \newline
 & + \text{\color{grey}{human-caused greenhouse effect (trapped outgoing radiation)}}
-\end{align}
+\end{align}``
 
 where each of these is interpreted as an average over the entire globe (hence "zero-dimensional").
 """
@@ -250,14 +251,14 @@ In math we just write down a differential equation, but in the physical world th
 
 In our baking the earth example, we will identify the following quantities:
 
-- Industrial Revolution Start: 1850
-- Avg Temperature in 1850: 14.0 °C
+- Industrial Revolution Start: $1850$
+- Avg Temperature in 1850: $14.0 °C$
 
-- Solar Insolation $S=$1368 W/m^2:  energy from the sun
+- Solar Insolation $S=1368 W/m^2$:  energy from the sun
 
-- Albedo or plentary reflectivity: α = 0.3
+- Albedo or plentary reflectivity: $α = 0.3$
 
-- atmosphere and upper-ocean heat capacity: C= 51  J/m^2/°C 
+- atmosphere and upper-ocean heat capacity: $C= 51  J/m^2/°C$ 
 
 Earth Baking Formula:
 $(html"<br>")
@@ -426,7 +427,7 @@ end
 # ╔═╡ 0b24f105-0166-4a41-97aa-156417d7203a
 begin
 	years = 1850:2020
-	plot( years, CO₂.(years.-1850), lw=3, legend=false)
+	plot( years, CO₂.(years.-1850), lw=3, legend=false, title="CO₂  cocncentration")
 end
 
 # ╔═╡ c6f8dcf6-950d-48ff-b040-55bdd347d74b
@@ -467,6 +468,9 @@ begin
 
 	first(CO2_historical_data_raw, 11)
 end
+
+# ╔═╡ b92a4c2c-df6b-485d-927a-db0123a5e6f0
+last(CO2_historical_data_raw, 12)
 
 # ╔═╡ f5c2d0de-f5d2-43f2-bfca-41bd727b3ca9
 md"""
@@ -567,6 +571,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
@@ -575,6 +580,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
 DifferentialEquations = "~7.1.0"
+LaTeXStrings = "~1.3.0"
 Plots = "~1.29.0"
 PlutoUI = "~0.7.38"
 """
@@ -583,8 +589,9 @@ PlutoUI = "~0.7.38"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0"
+julia_version = "1.8.0"
 manifest_format = "2.0"
+project_hash = "d7f34115961660c3b702d4d4121ed1fbcb4987cd"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -600,6 +607,7 @@ version = "3.3.3"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[deps.ArnoldiMethod]]
 deps = ["LinearAlgebra", "Random", "StaticArrays"]
@@ -746,6 +754,7 @@ version = "3.43.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -883,8 +892,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[deps.Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[deps.DualNumbers]]
 deps = ["Calculus", "NaNMath", "SpecialFunctions"]
@@ -938,6 +948,9 @@ deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
 git-tree-sha1 = "129b104185df66e408edd6625d480b7f9e9823a0"
 uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
 version = "0.9.18"
+
+[[deps.FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -1252,10 +1265,12 @@ version = "1.0.0"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1264,6 +1279,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1371,6 +1387,7 @@ version = "1.0.3"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[deps.Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1388,6 +1405,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[deps.MuladdMacro]]
 git-tree-sha1 = "c6190f9a7fc5d9d5915ab29f2134421b12d24a68"
@@ -1413,6 +1431,7 @@ version = "0.3.7"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[deps.NonlinearSolve]]
 deps = ["ArrayInterface", "FiniteDiff", "ForwardDiff", "IterativeSolvers", "LinearAlgebra", "RecursiveArrayTools", "RecursiveFactorization", "Reexport", "SciMLBase", "Setfield", "StaticArrays", "UnPack"]
@@ -1435,10 +1454,12 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1508,6 +1529,7 @@ version = "0.40.1+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1677,6 +1699,7 @@ version = "0.3.0+0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[deps.SIMDDualNumbers]]
 deps = ["ForwardDiff", "IfElse", "SLEEFPirates", "VectorizationBase"]
@@ -1828,6 +1851,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[deps.SuiteSparse_jll]]
 deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
+version = "5.10.1+0"
 
 [[deps.Sundials]]
 deps = ["CEnum", "DataStructures", "DiffEqBase", "Libdl", "LinearAlgebra", "Logging", "Reexport", "SparseArrays", "Sundials_jll"]
@@ -1844,6 +1868,7 @@ version = "5.2.1+0"
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[deps.TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1860,6 +1885,7 @@ version = "1.7.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -2099,6 +2125,7 @@ version = "1.4.0+3"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2121,6 +2148,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[deps.libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2143,10 +2171,12 @@ version = "1.3.7+1"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2184,7 +2214,7 @@ version = "0.9.1+5"
 # ╠═adb59adc-b30a-4dc4-bc3f-2804b7e02876
 # ╠═220420c1-e8cc-4ff6-8b79-ba2ec49c7695
 # ╟─7bee45a5-fa62-455b-813a-3e5dcf430289
-# ╟─bda41881-75c7-4732-9a66-d7947607b1b6
+# ╠═bda41881-75c7-4732-9a66-d7947607b1b6
 # ╟─aba7fc93-c0ac-4c9e-b975-18145f87707f
 # ╟─b9eca29e-9028-4fd7-8c62-718a2dcf87d1
 # ╟─dabca25c-e34b-4aed-8729-132d03c5bb45
@@ -2207,7 +2237,7 @@ version = "0.9.1+5"
 # ╠═9b97e41b-76ff-4cc2-90c1-446d59c4ece7
 # ╟─af893e1e-3bd7-4d05-83b6-f5f7e751b5e3
 # ╠═333290b0-0198-4306-b19b-6d30df79a280
-# ╠═eeaf3735-5139-4924-9fce-14df51a61042
+# ╟─eeaf3735-5139-4924-9fce-14df51a61042
 # ╟─20d6c513-2ca6-4dea-9092-156e2805d467
 # ╟─692a6928-c7a2-4b61-a794-16bef5d4e919
 # ╠═6d1058bf-8a05-4b8e-835a-de9e95f567c4
@@ -2215,17 +2245,18 @@ version = "0.9.1+5"
 # ╠═437faadd-0301-403a-bcd7-18ce279589d0
 # ╠═1a4d21bd-85ad-4935-913a-8992a8996db4
 # ╟─ee6414b7-e92d-4055-af17-6b02f05c28cd
-# ╠═fac5012a-960c-473c-bbf0-62c0be87f608
+# ╟─fac5012a-960c-473c-bbf0-62c0be87f608
 # ╠═99629ec2-dc70-4253-b191-305bccc9f36b
 # ╠═6b2beeec-6383-42b3-b694-8d77b961c8a1
 # ╠═0b24f105-0166-4a41-97aa-156417d7203a
 # ╟─c6f8dcf6-950d-48ff-b040-55bdd347d74b
 # ╟─cd1dcbc4-2273-4eda-85d9-9af4fd71b3c1
-# ╠═df4e8359-af8b-4bd5-aca0-7f6dd84859d4
+# ╟─df4e8359-af8b-4bd5-aca0-7f6dd84859d4
 # ╠═1cd9366a-99df-48d6-8879-7f0e786f3f34
 # ╠═734df847-513f-4f12-b3b6-71f1336fabe2
 # ╠═602bc054-2a5d-46d1-b76f-7f302ea46b08
 # ╠═c3b0b7fc-19be-4f04-8787-6349ab9bff7f
+# ╠═b92a4c2c-df6b-485d-927a-db0123a5e6f0
 # ╟─f5c2d0de-f5d2-43f2-bfca-41bd727b3ca9
 # ╟─ef9d9512-cb40-4641-9d6a-5a36f5a4b33d
 # ╠═2bc4c596-b313-49f6-84b5-5d53f2baf0e9
@@ -2234,7 +2265,7 @@ version = "0.9.1+5"
 # ╟─288bfc6b-6848-40d5-916b-95a8a4248a4f
 # ╠═a62ca8d1-321a-435e-a9df-f63d000376c7
 # ╟─3304174c-289d-47c5-b5ef-161b11e515eb
-# ╠═13269c86-06a4-4354-b620-bdf3f6432294
+# ╟─13269c86-06a4-4354-b620-bdf3f6432294
 # ╟─28acb5a4-2a5f-49c5-9c78-deb40fdeed36
 # ╟─13b003d2-1fd4-4a4a-960c-4a1d9b673dc6
 # ╟─a2288816-3621-4871-9faf-3e9c78674969

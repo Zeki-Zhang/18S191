@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -235,7 +235,7 @@ N = 5000
 
 # ╔═╡ dd87fc01-4bf0-44f6-a9f6-560e433754a0
 begin
-	xx = ( abs.(-2 .+ 4 .* rand(N)) .^ 2) .- 1.5
+	xx = -1.5 .+ 4 .* rand(N)
 	yy = rand(N)
 end
 
@@ -395,10 +395,13 @@ Note that this is just like a step of the Euler method for solving ODEs, but whe
 # ╔═╡ dce9e53a-28f4-11eb-070b-17e10779a38b
 U = 0.2;
 
-# ╔═╡ addab3e6-f189-41d6-badb-92f0323b6192
-# assign colours to particles:
-
-cs = map(xx) do x
+# ╔═╡ f684dd94-f1c7-4f79-9776-3a06b8eec39b
+begin
+	plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], series=:shape, alpha=0.5, fill=true, ratio=1, label=false, leg=false)
+	
+	new_xx = xx .+ U .* t
+	
+	cs = map(new_xx) do x
 	if -U * δ < x < 0
 		1
 	elseif 1 - (U * δ) < x < 1
@@ -407,15 +410,7 @@ cs = map(xx) do x
 		0
 	end
 end
-	
-
-# ╔═╡ f684dd94-f1c7-4f79-9776-3a06b8eec39b
-begin
-	plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], series=:shape, alpha=0.5, fill=true, ratio=1, label=false, leg=false)
-	
-	new_xx = xx .+ U .* t
-	
-	scatter!(xx .+ U .* t, yy, ms=1.5, alpha=0.1, c=:gray)
+	scatter!(new_xx, yy, ms=1.5, alpha=0.1, c=:gray)
 	
 	if show_particles
 		scatter!(new_xx[cs .!= 0], yy[cs .!= 0], ms=1.5, alpha=0.5, c=cs[cs .!= 0])
@@ -478,7 +473,9 @@ $$p^{n+1}_i = \frac{1}{2}(p^n_{i-1} + p^n_{i+1})$$
 
 If now we say that the walkers jump only with a certain probability, with a large probability to stay in the same place, and that these random walkers are the carriers of heat, then we get 
 
-$$T^{n+1}_i = \kappa (T^n_{i-1} - 2 T^n_i + T^n_{i+1}).$$
+$$\Delta T^{n+1}_i = \kappa (T^n_{i-1} - 2 T^n_i + T^n_{i+1}).$$
+
+$$\kappa = \frac{1}{2} \frac{\delta x^2}{\delta t} = Const$$
 
 Watch [this video](https://www.youtube.com/watch?v=a3V0BJLIo_c) from last semester's class to see Grant Sanderson explaining this.
 """
@@ -492,7 +489,7 @@ md"""
 md"""
 Introducing $\delta x$ as the spatial discretisation, and $\delta t$ as the time step, we get 
 
-$$T^{n+1}_i = \kappa \frac{\delta t}{\delta x^2}  (T^n_{i-1} - 2 T^n_i + T^n_{i+1}).$$
+$$\Delta T^{n+1}_i = \kappa \frac{\delta t}{\delta x^2}  (T^n_{i-1} - 2 T^n_i + T^n_{i+1}).$$
 
 """
 
@@ -538,9 +535,6 @@ function diffusion(T, δt, δx, D)
 
 	return T′
 end
-
-# ╔═╡ e74d920a-28fa-11eb-3c91-9133a01effc5
-@bind n4 Slider(1:length(evolution4), show_value=true)
 
 # ╔═╡ e63cfa84-2889-11eb-1ea2-51726645ddd9
 md"""
@@ -669,6 +663,7 @@ ts3, evolution3 = evolve(diffusion, xs, δt, 0.01)
 # ╔═╡ 21eb19f7-467b-4995-be65-8dede4eb7ac1
 let
 	p1 = plot(xs, results[n6], m=:o, xlim=(0, 1), ylim=(-3.1, 3.1), title="t = $(round(ts3[n3], digits=2))", leg=false)
+	plot!(p1, xs, results[1], m=:x)
 	p2 = temperature_heatmap(xs, results[n6])
 
 	plot(p1, p2, layout = grid(2, 1, heights=[0.9, 0.1]), clim=(-1, 1))
@@ -683,15 +678,6 @@ let
 end
 
 
-# ╔═╡ dc7b6328-28fa-11eb-38b7-71a6f8d0a751
-let
-	p1 = plot(xs, evolution4[n4], m=:o, xlim=(0, 1), ylim=(-0.1, 1.1), title="t = $(round(ts3[n3], digits=2))", leg=false)
-	p2 = temperature_heatmap(xs, evolution4[n4])
-
-	plot(p1, p2, layout = grid(2, 1, heights=[0.9, 0.1]), clim=(-1, 1))
-end
-
-
 # ╔═╡ f6fa3770-288d-11eb-32de-f95e03705791
 ts5, evolution5 = evolve(advection_diffusion, xs, δt, (1.0, 0.01))
 
@@ -700,7 +686,7 @@ ts5, evolution5 = evolve(advection_diffusion, xs, δt, (1.0, 0.01))
 
 # ╔═╡ 65126bfc-288d-11eb-2bfc-493588365164
 let
-	p1 = plot(xs, evolution5[n5], m=:o, xlim=(0, 1), ylim=(-1.1, 1.1), title="t = $(round(ts3[n3], digits=2))", leg=false)
+	p1 = plot(xs, evolution5[n5], m=:o, xlim=(0, 1), ylim=(-1.1, 1.1), title="t = $(round(ts5[n5], digits=2))", leg=false)
 	p2 = temperature_heatmap(xs, evolution5[n5])
 
 	plot(p1, p2, layout = grid(2, 1, heights=[0.9, 0.1]), clim=(-1, 1))
@@ -736,6 +722,7 @@ version = "3.3.3"
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -800,6 +787,7 @@ version = "3.43.0"
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[Contour]]
 deps = ["StaticArrays"]
@@ -842,8 +830,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -868,6 +857,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1056,10 +1048,12 @@ version = "0.15.15"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1068,6 +1062,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1152,6 +1147,7 @@ version = "1.0.3"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1169,6 +1165,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[NaNMath]]
 git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
@@ -1177,6 +1174,7 @@ version = "1.0.0"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1187,10 +1185,12 @@ version = "1.3.5+1"
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1236,6 +1236,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1315,6 +1316,7 @@ version = "1.3.0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -1385,6 +1387,7 @@ version = "0.6.7"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1401,6 +1404,7 @@ version = "1.7.0"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1593,6 +1597,7 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1609,6 +1614,7 @@ version = "0.15.1+0"
 [[libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1631,10 +1637,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1664,10 +1672,10 @@ version = "0.9.1+5"
 # ╟─956f5104-277d-11eb-291d-1faef485a5aa
 # ╟─b12e76db-1a18-465a-8955-dab29dfde611
 # ╟─c14470f2-d8a4-4d34-8470-09842b2576a3
-# ╟─30006c82-695d-40b1-8ded-22d03c3bff41
+# ╠═30006c82-695d-40b1-8ded-22d03c3bff41
 # ╟─b04a6f81-3ece-4521-b141-a2e416718948
 # ╟─6b2bfc73-d0a9-4a36-970d-c89149238284
-# ╟─21eb19f7-467b-4995-be65-8dede4eb7ac1
+# ╠═21eb19f7-467b-4995-be65-8dede4eb7ac1
 # ╟─36328b70-277d-11eb-02c7-2f854c1466cc
 # ╟─42190984-277d-11eb-1ac2-7d84516c3269
 # ╟─d2bed768-277e-11eb-32cf-41f1fedec3cb
@@ -1677,7 +1685,7 @@ version = "0.9.1+5"
 # ╠═fa327c08-286b-11eb-0032-2384998a42a8
 # ╟─0db43be2-284c-11eb-2740-4379437fd70c
 # ╟─468a0590-2780-11eb-045c-d1f468fc4e50
-# ╠═6de1859c-277f-11eb-1ead-8b4794832d59
+# ╟─6de1859c-277f-11eb-1ead-8b4794832d59
 # ╟─af30a0d0-2781-11eb-0274-ab423205facb
 # ╟─646bc32e-284c-11eb-2ce8-5f64b1a49534
 # ╟─79ce4b10-284c-11eb-2258-2155f850171d
@@ -1688,10 +1696,9 @@ version = "0.9.1+5"
 # ╠═e94a90c5-f2c1-4b5b-9946-7869ef7775a6
 # ╠═dd87fc01-4bf0-44f6-a9f6-560e433754a0
 # ╠═7ae9f5b8-10ea-42a7-aa01-0e04a7287c77
-# ╟─addab3e6-f189-41d6-badb-92f0323b6192
 # ╟─2f24e0c7-b05c-4f89-835a-081f8e6107e5
 # ╟─75bc87be-2b66-46b5-8de8-428a63655815
-# ╟─f684dd94-f1c7-4f79-9776-3a06b8eec39b
+# ╠═f684dd94-f1c7-4f79-9776-3a06b8eec39b
 # ╟─3437e53b-9dd0-4afe-a1bd-a556871d1799
 # ╟─65df7158-60dc-4809-82a3-913a79bcfc75
 # ╟─7256778a-2785-11eb-0369-f3b43d5dd203
@@ -1710,7 +1717,7 @@ version = "0.9.1+5"
 # ╠═dce9e53a-28f4-11eb-070b-17e10779a38b
 # ╠═02a893e4-2852-11eb-358a-371459191da7
 # ╠═e6ae447e-2851-11eb-3fe1-096459167f2b
-# ╟─014e2530-2852-11eb-103f-1d647cb999b0
+# ╠═014e2530-2852-11eb-103f-1d647cb999b0
 # ╟─8c05e3cc-2858-11eb-1e1c-9781c30738c3
 # ╠═a29fecac-285a-11eb-14b0-9313f8994fbb
 # ╠═e42ec13e-285a-11eb-3cc0-7dc41ed5495b
@@ -1729,8 +1736,6 @@ version = "0.9.1+5"
 # ╠═121255d2-288a-11eb-1fa5-9db68af8c232
 # ╠═09bc3c40-288a-11eb-0339-59f0b70e03a3
 # ╠═175d9902-288a-11eb-3700-390ccd1caa5b
-# ╠═e74d920a-28fa-11eb-3c91-9133a01effc5
-# ╟─dc7b6328-28fa-11eb-38b7-71a6f8d0a751
 # ╟─e63cfa84-2889-11eb-1ea2-51726645ddd9
 # ╟─eee3008e-2889-11eb-088a-73aff304e736
 # ╠═ffd2a838-2889-11eb-1a7c-b35992543b8a

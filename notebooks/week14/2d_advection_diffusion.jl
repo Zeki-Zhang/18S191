@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -102,7 +102,7 @@ where $T(x, t)$ is the temperature, $U$ is a constant *advective velocity* and $
 The two-dimensional advection diffusion equation adds advection and diffusion operators acting in a *second spatial dimension* $y$ that is perpendicular to $x$. 
 The temperature field $T$ is then a function $T = T(x, y, t)$, and the PDE becomes
 
-$\frac{\partial T(x,y,t)}{\partial t} = u(x,y) \frac{\partial T}{\partial x} + v(x,y) \frac{\partial T}{\partial y} + \kappa \left( \frac{\partial^{2} T}{\partial x^{2}} + \frac{\partial^{2} T}{\partial y^{2}} \right),$
+$\frac{\partial T(x,y,t)}{\partial t} = -u(x,y,t) \frac{\partial T}{\partial x} - v(x,y,t) \frac{\partial T}{\partial y} + \kappa \left( \frac{\partial^{2} T}{\partial x^{2}} + \frac{\partial^{2} T}{\partial y^{2}} \right),$
 
 where $\vec{u}(x,y) = (u, v) = u\,\mathbf{\hat{x}} + v\,\mathbf{\hat{y}}$ is a velocity vector field, and each partial derivative is also a function of $x$, $y$ and $t$.
 
@@ -154,16 +154,17 @@ if show_review
 
 	**Note:** Since seawater is largely **incompressible**, we have $\nabla \cdot \vec{u} = \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = 0$, i.e.  ocean currents are approximately a *non-divergent flow*. Among other implications, this allows us to write:
 
-	\begin{align}
+	
+	``\begin{align}
 	\vec{u} \cdot \nabla T&=
 	u\frac{\partial T(x,y,t)}{\partial x} + v\frac{\partial T(x,y,t)}{\partial y}\newline &=
 	u\frac{\partial T}{\partial x} + v\frac{\partial T}{\partial y} + T\left(\frac{\partial u}{\partial x} + \frac{\partial v}{\partial y}\right)\newline &=
 	\left( u\frac{\partial T}{\partial x} + T\frac{\partial u}{\partial x} \right) +
 	\left( v\frac{\partial T}{\partial y} + \frac{\partial v}{\partial y} \right)
 	\newline &=
-	\frac{\partial (uT)}{\partial x} + \frac{\partial (vT)}{\partial x}\newline &=
+	\frac{\partial (uT)}{\partial x} + \frac{\partial (vT)}{\partial y}\newline &=
 	\nabla \cdot (\vec{u}T)
-	\end{align}
+	\end{align}``
 
 	using the product rule (separately in both $x$ and $y$).
 	
@@ -240,7 +241,7 @@ $u\frac{\partial T}{\partial x} = \kappa \frac{\partial T}{\partial x} = 0$ at $
 
 $v\frac{\partial T}{\partial y} = \kappa \frac{\partial T}{\partial y} = 0$ at the $y$ boundaries.
 
-To impose this, we treat $i=1$ and $i=N_{x}$ as *ghost cells*, which do not do anything expect help us impose these boundaries conditions. Discretely, the boundary fluxes between $i=1$ and $i=2$ vanish if
+To impose this, we treat $i=1$ and $i=N_{x}$ as *ghost cells*, which do not do anything except help us impose these boundaries conditions. Discretely, the boundary fluxes between $i=1$ and $i=2$ vanish if
 
 $\dfrac{T_{2,\,j}^{n} -T_{1,\,j}^{n}}{\Delta x} = 0$ or 
 
@@ -626,11 +627,20 @@ begin
 	plot_kernel(xgrad_kernel)
 end
 
+# ╔═╡ 2c11adc7-4148-4d56-b18e-febe9a086897
+xgrad_kernel[0,-1]
+
 # ╔═╡ 682f2530-2a97-11eb-3ee6-99a7c79b3767
 begin
 	ygrad_kernel = OffsetArray(reshape([-1., 0, 1.], 3, 1),  -1:1, 0:0)
 	plot_kernel(ygrad_kernel)
 end
+
+# ╔═╡ e3978d63-7040-446a-ad93-bde2e707e4dc
+ygrad_kernel 
+
+# ╔═╡ aa4c5972-edef-4aac-a008-2ae60ed4c9dc
+ygrad_kernel[-1:1,0]
 
 # ╔═╡ f4c884fc-2a97-11eb-1ba9-01bf579f8b43
 begin
@@ -755,6 +765,7 @@ version = "3.3.3"
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -819,6 +830,7 @@ version = "3.43.0"
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[Contour]]
 deps = ["StaticArrays"]
@@ -861,8 +873,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -887,6 +900,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1075,10 +1091,12 @@ version = "0.15.15"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1087,6 +1105,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1171,6 +1190,7 @@ version = "1.0.3"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1188,6 +1208,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[NaNMath]]
 git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
@@ -1196,6 +1217,7 @@ version = "1.0.0"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[OffsetArrays]]
 deps = ["Adapt"]
@@ -1212,10 +1234,12 @@ version = "1.3.5+1"
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1261,6 +1285,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1340,6 +1365,7 @@ version = "1.3.0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -1410,6 +1436,7 @@ version = "0.6.7"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1426,6 +1453,7 @@ version = "1.7.0"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1618,6 +1646,7 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1634,6 +1663,7 @@ version = "0.15.1+0"
 [[libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1656,10 +1686,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1690,9 +1722,12 @@ version = "0.9.1+5"
 # ╟─3a4a1aea-2118-11eb-30a9-57b87f2ddfae
 # ╟─023779a0-2a95-11eb-35b5-7be93c43afaf
 # ╟─b1b5625e-211a-11eb-3ee1-3ba9c9cc375a
-# ╠═1e8d37ee-2a97-11eb-1d45-6b426b25d4eb
+# ╟─1e8d37ee-2a97-11eb-1d45-6b426b25d4eb
+# ╠═2c11adc7-4148-4d56-b18e-febe9a086897
 # ╟─3578b158-2a97-11eb-0771-bf6d82d3b6d1
 # ╟─682f2530-2a97-11eb-3ee6-99a7c79b3767
+# ╠═e3978d63-7040-446a-ad93-bde2e707e4dc
+# ╠═aa4c5972-edef-4aac-a008-2ae60ed4c9dc
 # ╟─7f3c9550-2a97-11eb-1549-455009025872
 # ╠═f4c884fc-2a97-11eb-1ba9-01bf579f8b43
 # ╟─0127bca6-2a99-11eb-16a0-8d7af66694f8

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -45,6 +45,9 @@ md"""
 
 Submission by: **_$(student.name)_** ($(student.kerberos_id)@mit.edu)
 """
+
+# ╔═╡ 46c674f8-8008-4486-b836-67917c74399b
+TableOfContents(depth=5)
 
 # ╔═╡ 253f4da0-2433-11eb-1e48-4906059607d3
 md"_Let's create a package environment:_"
@@ -198,7 +201,9 @@ md"""
 
 # ╔═╡ a86f13de-259d-11eb-3f46-1f6fb40020ce
 observations_from_changing_B = md"""
-Hello world!
+B more negative, equilibrium lower; B less negative, equilibrium higher
+
+The more negative is B, the bigger the feddback parameter and lower temperature
 """
 
 # ╔═╡ 3d66bd30-259d-11eb-2694-471fb3a4a7be
@@ -208,7 +213,7 @@ md"""
 
 # ╔═╡ 5f82dec8-259e-11eb-2f4f-4d661f44ef41
 observations_from_nonnegative_B = md"""
-Hello world!
+positive feedback, temperature will rise linearly indefinitely
 """
 
 # ╔═╡ 56b68356-2601-11eb-39a9-5f4b8e580b87
@@ -226,16 +231,13 @@ md"""
 👉 Create a graph to visualize ECS as a function of B. 
 """
 
-# ╔═╡ b9f882d8-266b-11eb-2998-75d6539088c7
-
-
 # ╔═╡ 269200ec-259f-11eb-353b-0b73523ef71a
 md"""
 #### Exercise 1.2 - _Doubling CO₂_
 
 To compute ECS, we doubled the CO₂ in our atmosphere. This factor 2 is not entirely arbitrary: without substantial effort to reduce CO₂ emissions, we are expected to **at least** double the CO₂ in our atmosphere by 2100. 
 
-Right now, our CO₂ concentration is 415 ppm -- $(round(415 / 280, digits=3)) times the pre-industrial value of 280 ppm from 1850. 
+Right now, our CO₂ concentration is 421 ppm -- $(round(421 / 280, digits=3)) times the pre-industrial value of 280 ppm from 1850. 
 
 The CO₂ concentrations in the _future_ depend on human action. There are several models for future concentrations, which are formed by assuming different _policy scenarios_. A baseline model is RCP8.5 - a "worst-case" high-emissions scenario. In our notebook, this model is given as a function of ``t``.
 """
@@ -244,13 +246,6 @@ The CO₂ concentrations in the _future_ depend on human action. There are sever
 md"""
 👉 In what year are we expected to have doubled the CO₂ concentration, under policy scenario RCP8.5?
 """
-
-# ╔═╡ 50ea30ba-25a1-11eb-05d8-b3d579f85652
-expected_double_CO2_year = let
-	
-	
-	missing
-end
 
 # ╔═╡ bade1372-25a1-11eb-35f4-4b43d4e8d156
 md"""
@@ -297,6 +292,14 @@ let
 		label="ΔT(t) = T(t) - T₀")
 end |> as_svg
 
+# ╔═╡ b9f882d8-266b-11eb-2998-75d6539088c7
+let
+	B = -1.7:.01:-.9
+	plot(B, ECS(B=B), ylabel="ECS [°C]", xlabel="B", legend=false
+	)
+
+end
+
 # ╔═╡ 736ed1b6-1fc2-11eb-359e-a1be0a188670
 B_samples = let
 	B_distribution = Normal(B̅, σ)
@@ -316,13 +319,13 @@ md"""
 """
 
 # ╔═╡ 3d72ab3a-2689-11eb-360d-9b3d829b78a9
-ECS_samples = missing
+ECS_samples = ECS(B=B_samples)
 
 # ╔═╡ b6d7a362-1fc8-11eb-03bc-89464b55c6fc
 md"**Answer:**"
 
 # ╔═╡ 1f148d9a-1fc8-11eb-158e-9d784e390b24
-
+histogram(ECS_samples, label=nothing, xlabel="ECS [°C]", ylabel="samples")
 
 # ╔═╡ cf8dca6c-1fc8-11eb-1f89-099e6ba53c22
 md"It looks like the ECS distribution is **not normally distributed**, even though $B$ is. 
@@ -330,15 +333,18 @@ md"It looks like the ECS distribution is **not normally distributed**, even thou
 👉 How does $\overline{\text{ECS}(B)}$ compare to $\text{ECS}(\overline{B})$? What is the probability that $\text{ECS}(B)$ lies above $\text{ECS}(\overline{B})$?
 "
 
-# ╔═╡ 02173c7a-2695-11eb-251c-65efb5b4a45f
+# ╔═╡ bcc1124e-519b-49f5-b8a1-5ac18a6c1d1e
+md""" $\overline{\text{ECS}(B)}$ = $(mean(ECS_samples))"""
 
+# ╔═╡ 3f6436e7-1c34-481d-804a-627b44e3b994
+md""" $\text{ECS}(\overline{B})$ = $(ECS()) """
 
 # ╔═╡ 440271b6-25e8-11eb-26ce-1b80aa176aca
 md"👉 Does accounting for uncertainty in feedbacks make our expectation of global warming better (less implied warming) or worse (more implied warming)?"
 
 # ╔═╡ cf276892-25e7-11eb-38f0-03f75c90dd9e
 observations_from_the_order_of_averaging = md"""
-Hello world!
+It is worse
 """
 
 # ╔═╡ 5b5f25f0-266c-11eb-25d4-17e411c850c9
@@ -427,7 +433,10 @@ In this simulation, we used `T0 = 14` and `CO2 = t -> 280`, which is why `T` is 
 # ╔═╡ 9596c2dc-2671-11eb-36b9-c1af7e5f1089
 simulated_rcp85_model = let
 	
-	missing
+	ebm = Model.EBM(14.0, 1850.0, 1, Model.CO2_RCP85)
+	Model.run!(ebm, 2100)
+	plot(ebm.t, ebm.T, legend=false, xlabel="year", ylabel="temperature [°C]")
+	scatter!([2100], [ebm.T[end]], markersize=5, marlercolor=:red)
 end
 
 # ╔═╡ f94a1d56-2671-11eb-2cdc-810a9c7a8a5f
@@ -450,8 +459,10 @@ md"""
 
 # ╔═╡ f688f9f2-2671-11eb-1d71-a57c9817433f
 function temperature_response(CO2::Function, B::Float64=-1.3)
+	ebm = Model.EBM(14.0, 1850, 1, CO2; B=B)
+	Model.run!(ebm, 2100)
 	
-	return missing
+	return ebm.T[end]
 end
 
 # ╔═╡ 049a866e-2672-11eb-29f7-bfea7ad8f572
@@ -476,6 +487,20 @@ t = 1850:2100
 plot(t, Model.CO2_RCP85.(t), 
 	ylim=(0, 1200), ylabel="CO2 concentration [ppm]")
 
+# ╔═╡ 50ea30ba-25a1-11eb-05d8-b3d579f85652
+expected_double_CO2_year = let
+
+	y = 0
+	for i in t
+		if Model.CO2_RCP85(i) > 560.0
+			y = i
+			break
+		end
+	end
+	y
+	
+end
+
 # ╔═╡ 40f1e7d8-252d-11eb-0549-49ca4e806e16
 @bind t_scenario_test Slider(t; show_value=true, default=1850)
 
@@ -490,8 +515,29 @@ We are interested in how the **uncertainty in our input** $B$ (the climate feedb
 
 """
 
-# ╔═╡ f2e55166-25ff-11eb-0297-796e97c62b07
+# ╔═╡ fe60a470-617a-428d-aac9-1317b8e4ef8d
+B_large_samples = let
+	B_distribution = Normal(B̅, σ)
+	Nsamples = 100_000
+	
+	samples = rand(B_distribution, Nsamples)
+	# we only sample negative values of B
+	filter(x -> x < 0, samples)
+end
 
+# ╔═╡ f2e55166-25ff-11eb-0297-796e97c62b07
+let
+	T_RCP26 = []
+	T_RCP85 = []
+	N = length(B_large_samples)
+	for B in B_large_samples
+		push!(T_RCP26, temperature_response(Model.CO2_RCP26, B))
+		push!(T_RCP85, temperature_response(Model.CO2_RCP85, B))
+	end
+	p_RCP26 = sum(T_RCP26 .> 16) / N
+	p_RCP85 = sum(T_RCP85 .> 16) / N
+	(p_RCP26, p_RCP85)
+end
 
 # ╔═╡ 1ea81214-1fca-11eb-2442-7b0b448b49d6
 md"""
@@ -520,6 +566,12 @@ In the [lecture notebook](https://github.com/hdrake/simplEarth/blob/master/2_ebm
 md"""
 Below we have an empty diagram, which is already set up with a CO₂ vs $T$ diagram, with a logarthmic horizontal axis. Now it's your turn! We have written some pointers below to help you, but feel free to do it your own way.
 """
+
+# ╔═╡ 1d388372-2695-11eb-3068-7b28a2ccb9ac
+begin
+	log_CO₂_slider = @bind log_CO₂ Slider(1:0.01:6; default=log10(Model.CO2_PI),show_value=true)
+	md""" logCO₂ = $( log_CO₂_slider ) """
+end
 
 # ╔═╡ 3cbc95ba-2685-11eb-3810-3bf38aa33231
 md"""
@@ -555,7 +607,7 @@ function add_reference_points!(p)
 	plot!(p, 
 		[Model.CO2_PI, Model.CO2_PI], [-55, 75], 
 		color=:grey, alpha=0.3, lw=8, 
-		label="Pre-industrial CO2"
+		label="Pre-industrial CO₂"
 	)
 	plot!(p, 
 		[Model.CO2_PI], [Model.T0], 
@@ -574,9 +626,6 @@ md"""
 👉 Create a slider for `CO2` between `CO2min` and `CO2max`. Just like the horizontal axis of our plot, we want the slider to be _logarithmic_. 
 """
 
-# ╔═╡ 1d388372-2695-11eb-3068-7b28a2ccb9ac
-
-
 # ╔═╡ 4c9173ac-2685-11eb-2129-99071821ebeb
 md"""
 👉 Write a function `step_model!` that takes an existing `ebm` and `new_CO2`, which performs a step of our interactive process:
@@ -588,7 +637,10 @@ md"""
 # ╔═╡ 736515ba-2685-11eb-38cb-65bfcf8d1b8d
 function step_model!(ebm::Model.EBM, CO2::Real)
 	
-	# your code here
+	ebm.t = [0]
+	ebm.T = [ebm.T[end]]
+	ebm.CO2 = x -> CO2
+	Model.run!(ebm)
 	
 	return ebm
 end
@@ -597,6 +649,20 @@ end
 md"""
 👉 Inside the plot cell, call the function `step_model!`.
 """
+
+# ╔═╡ 78550b9b-53fd-4cf7-afc3-65afcc11fe6a
+md"""#### for plot trajectory"""
+
+# ╔═╡ 6ab125a9-df60-404b-994e-e61a0e1b8fca
+begin
+
+	ntraj = 10
+	Ttraj = repeat([NaN], ntraj)
+	CO2traj = repeat([NaN], ntraj)
+end
+
+# ╔═╡ 784dc0be-6d5b-441b-90b6-d7a5d816d3f2
+
 
 # ╔═╡ 09ce27ca-268c-11eb-0cdd-c9801db876f8
 md"""
@@ -620,9 +686,9 @@ let
 	p = plot(
 		xlims=(CO2min, CO2max), ylims=(-55, 75), 
 		xaxis=:log,
-		xlabel="CO2 concentration [ppm]", 
+		xlabel="CO₂ concentration [ppm]", 
 		ylabel="Global temperature T [°C]",
-		title="Earth's CO2 concentration bifurcation diagram",
+		title="Earth's CO₂ concentration bifurcation diagram",
 		legend=:topleft
 	)
 	
@@ -630,6 +696,9 @@ let
 	add_reference_points!(p)
 	
 	# your code here 
+	CO2 = 10^log_CO₂
+	step_model!(ebm, CO2)
+	
 	
 	plot!(p, 
 		[ebm.CO2(ebm.t[end])], [ebm.T[end]],
@@ -677,8 +746,18 @@ md"""
 
 # ╔═╡ 9eb07a6e-2687-11eb-0de3-7bc6aa0eefb0
 co2_to_melt_snowball = let
+
+	log_CO2 = 1:0.01:6
+	CO2 = 10 .^ log_CO2
+	T = []
+	ebm = Model.EBM(Tneo, 0., 5., Model.CO2_const)
+	for CO2 in CO2
+		step_model!(ebm, CO2)
+		push!(T, ebm.T[end])
+	end
+	index = findfirst(x -> x > -10, T)
+	CO2[index]
 	
-	missing
 end
 
 # ╔═╡ 36e2dfea-2433-11eb-1c90-bb93ab25b33c
@@ -773,6 +852,7 @@ version = "3.3.3"
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -843,6 +923,7 @@ version = "3.43.0"
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[Contour]]
 deps = ["StaticArrays"]
@@ -897,8 +978,9 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[DualNumbers]]
 deps = ["Calculus", "NaNMath", "SpecialFunctions"]
@@ -929,6 +1011,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -1129,10 +1214,12 @@ version = "0.15.15"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1141,6 +1228,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1225,6 +1313,7 @@ version = "1.0.3"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1242,6 +1331,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[NaNMath]]
 git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
@@ -1250,6 +1340,7 @@ version = "1.0.0"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1260,10 +1351,12 @@ version = "1.3.5+1"
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1315,6 +1408,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1412,6 +1506,7 @@ version = "0.3.0+0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
@@ -1492,6 +1587,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
@@ -1508,6 +1604,7 @@ version = "1.7.0"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1700,6 +1797,7 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1716,6 +1814,7 @@ version = "0.15.1+0"
 [[libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1738,10 +1837,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1767,11 +1868,12 @@ version = "0.9.1+5"
 # ╟─18be4f7c-2433-11eb-33cb-8d90ca6f124c
 # ╟─21524c08-2433-11eb-0c55-47b1bdc9e459
 # ╠═23335418-2433-11eb-05e4-2b35dc6cca0e
+# ╠═46c674f8-8008-4486-b836-67917c74399b
 # ╟─253f4da0-2433-11eb-1e48-4906059607d3
 # ╠═1e06178a-1fbf-11eb-32b3-61769a79b7c0
 # ╟─87e68a4a-2433-11eb-3e9d-21675850ed71
 # ╟─fe3304f8-2668-11eb-066d-fdacadce5a19
-# ╟─930d7154-1fbf-11eb-1c3a-b1970d291811
+# ╠═930d7154-1fbf-11eb-1c3a-b1970d291811
 # ╟─1312525c-1fc0-11eb-2756-5bc3101d2260
 # ╠═c4398f9c-1fc4-11eb-0bbb-37f066c6027d
 # ╟─7f961bc0-1fc5-11eb-1f18-612aeff0d8df
@@ -1793,14 +1895,15 @@ version = "0.9.1+5"
 # ╟─51e2e742-25a1-11eb-2511-ab3434eacc3e
 # ╟─bade1372-25a1-11eb-35f4-4b43d4e8d156
 # ╠═02232964-2603-11eb-2c4c-c7b7e5fed7d1
-# ╟─736ed1b6-1fc2-11eb-359e-a1be0a188670
+# ╠═736ed1b6-1fc2-11eb-359e-a1be0a188670
 # ╠═49cb5174-1fc3-11eb-3670-c3868c9b0255
 # ╟─f3abc83c-1fc7-11eb-1aa8-01ce67c8bdde
 # ╠═3d72ab3a-2689-11eb-360d-9b3d829b78a9
 # ╟─b6d7a362-1fc8-11eb-03bc-89464b55c6fc
 # ╠═1f148d9a-1fc8-11eb-158e-9d784e390b24
-# ╟─cf8dca6c-1fc8-11eb-1f89-099e6ba53c22
-# ╠═02173c7a-2695-11eb-251c-65efb5b4a45f
+# ╠═cf8dca6c-1fc8-11eb-1f89-099e6ba53c22
+# ╠═bcc1124e-519b-49f5-b8a1-5ac18a6c1d1e
+# ╠═3f6436e7-1c34-481d-804a-627b44e3b994
 # ╟─440271b6-25e8-11eb-26ce-1b80aa176aca
 # ╠═cf276892-25e7-11eb-38f0-03f75c90dd9e
 # ╟─5b5f25f0-266c-11eb-25d4-17e411c850c9
@@ -1823,22 +1926,26 @@ version = "0.9.1+5"
 # ╠═40f1e7d8-252d-11eb-0549-49ca4e806e16
 # ╟─ee1be5dc-252b-11eb-0865-291aa823b9e9
 # ╟─06c5139e-252d-11eb-2645-8b324b24c405
+# ╠═fe60a470-617a-428d-aac9-1317b8e4ef8d
 # ╠═f2e55166-25ff-11eb-0297-796e97c62b07
 # ╟─1ea81214-1fca-11eb-2442-7b0b448b49d6
 # ╟─a0ef04b0-25e9-11eb-1110-cde93601f712
 # ╟─3e310cf8-25ec-11eb-07da-cb4a2c71ae34
 # ╟─d6d1b312-2543-11eb-1cb2-e5b801686ffb
+# ╟─1d388372-2695-11eb-3068-7b28a2ccb9ac
 # ╠═378aed18-252b-11eb-0b37-a3b511af2cb5
 # ╟─3cbc95ba-2685-11eb-3810-3bf38aa33231
 # ╟─68b2a560-2536-11eb-0cc4-27793b4d6a70
 # ╟─0e19f82e-2685-11eb-2e99-0d094c1aa520
 # ╟─1eabe908-268b-11eb-329b-b35160ec951e
-# ╠═1d388372-2695-11eb-3068-7b28a2ccb9ac
 # ╟─53c2eaf6-268b-11eb-0899-b91c03713da4
 # ╠═06d28052-2531-11eb-39e2-e9613ab0401c
 # ╟─4c9173ac-2685-11eb-2129-99071821ebeb
 # ╠═736515ba-2685-11eb-38cb-65bfcf8d1b8d
 # ╟─8b06b944-268c-11eb-0bfc-8d4dd21e1f02
+# ╟─78550b9b-53fd-4cf7-afc3-65afcc11fe6a
+# ╠═6ab125a9-df60-404b-994e-e61a0e1b8fca
+# ╠═784dc0be-6d5b-441b-90b6-d7a5d816d3f2
 # ╟─09ce27ca-268c-11eb-0cdd-c9801db876f8
 # ╟─298deff4-2676-11eb-2595-e7e22f613ea1
 # ╟─2bbf5a70-2676-11eb-1085-7130d4a30443
